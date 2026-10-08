@@ -8,3 +8,8 @@ spec:
     requests:
       cpu: 30m
       memory: 512Mi
+
+  gcp:
+    bigQueryDatasets:
+      - name: tsm_kafka_sink
+        permission: READWRITE
