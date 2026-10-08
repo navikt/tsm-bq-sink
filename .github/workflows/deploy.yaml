@@ -25,7 +25,6 @@ jobs:
       - uses: navikt/tsm-workflows/actions/gradle/build@main
         id: build
         with:
-          app: "tsm-bq-sink"
           team: "tsm"
           salsa: false
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
