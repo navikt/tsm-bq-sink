@@ -2,6 +2,7 @@ package no.nav.tsm
 
 import io.ktor.server.application.Application
 import io.ktor.server.netty.EngineMain
+import no.nav.tsm.kafka.configureKafka
 import no.nav.tsm.plugins.configureDatabase
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureMonitoring
@@ -14,4 +15,6 @@ fun Application.module() {
     configureDependencies()
     configureMonitoring()
     configureDatabase()
+
+    configureKafka()
 }

@@ -8,6 +8,7 @@ private val logger = logger()
 fun migrateDatabase(env: GcpConfig) {
     val bigQuery = BigQueryOptions.newBuilder()
         .setProjectId(env.projectId)
+        .setLocation("europe-north1")
         .build().service
 
     val table = bigQuery.getTable(MIGRATIONS_TABLE)
@@ -45,8 +46,8 @@ private fun v1InitialSchema(bigQuery: BigQuery) {
         nonNullableField("fom", StandardSQLTypeName.DATE),
         nonNullableField("tom", StandardSQLTypeName.DATE),
         nonNullableField("type", StandardSQLTypeName.STRING),
-        nonNullableField("generert_dato", StandardSQLTypeName.DATE),
-        nonNullableField("nav_mottatt_dato", StandardSQLTypeName.DATE),
+        nonNullableField("generert_dato", StandardSQLTypeName.DATETIME),
+        nonNullableField("nav_mottatt_dato", StandardSQLTypeName.DATETIME),
         nonNullableField("regel_utfall", StandardSQLTypeName.STRING),
         field("avsender_system", StandardSQLTypeName.STRING),
         field("avsender_version", StandardSQLTypeName.STRING),
@@ -69,7 +70,7 @@ private fun v1InitialSchema(bigQuery: BigQuery) {
         .build()
 
     val tableInfo = TableInfo
-        .newBuilder(TableId.of(DATASET_ID, "sykmeldinger"), tableDefinition)
+        .newBuilder(SYKMELDINGER_TABLE, tableDefinition)
         .build()
 
     bigQuery.create(tableInfo)

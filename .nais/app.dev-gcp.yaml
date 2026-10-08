@@ -13,3 +13,6 @@ spec:
     bigQueryDatasets:
       - name: tsm_kafka_sink
         permission: READWRITE
+
+  kafka:
+    pool: nav-dev

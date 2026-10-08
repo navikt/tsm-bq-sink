@@ -8,8 +8,9 @@ import com.google.cloud.bigquery.StandardSQLTypeName
 import com.google.cloud.bigquery.TableId
 
 const val DATASET_ID = "tsm_kafka_sink"
-val MIGRATIONS_TABLE: TableId = TableId.of(DATASET_ID, "_migrations")
 
+val MIGRATIONS_TABLE: TableId = TableId.of(DATASET_ID, "_migrations")
+val SYKMELDINGER_TABLE: TableId = TableId.of(DATASET_ID, "sykmeldinger")
 
 fun BigQuery.getCurrentSchemaVersion(): Long {
     return this.query(
