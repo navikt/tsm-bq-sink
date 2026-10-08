@@ -1,10 +1,12 @@
 [versions]
 kotlin = "2.4.0"
-logback = "1.5.37"
+logback = "1.6.1"
+logbackEncoder = "9.0"
 
 [libraries]
+# Monitoring and observability
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logbackEncoder" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
-kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

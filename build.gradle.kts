@@ -15,10 +15,18 @@ kotlin {
     jvmToolchain(21)
 }
 dependencies {
-    implementation(ktorLibs.server.config.yaml)
     implementation(ktorLibs.server.core)
     implementation(ktorLibs.server.netty)
+    implementation(ktorLibs.server.di)
     implementation(libs.logback.classic)
+
+    implementation(tsmKtorLibs.core)
+    implementation(tsmKtorLibs.kafka.sykmeldinger)
+
+    // Monitoring and logging
+    implementation(libs.logback.classic)
+    implementation(libs.logback.encoder)
+
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
