@@ -1,21 +1,9 @@
 package no.nav.tsm.core
 
-import com.google.cloud.bigquery.BigQuery
-import com.google.cloud.bigquery.BigQueryOptions
-import com.google.cloud.bigquery.Field
-import com.google.cloud.bigquery.InsertAllRequest
-import com.google.cloud.bigquery.QueryJobConfiguration
-import com.google.cloud.bigquery.Schema
-import com.google.cloud.bigquery.StandardSQLTypeName
-import com.google.cloud.bigquery.StandardTableDefinition
-import com.google.cloud.bigquery.TableId
-import com.google.cloud.bigquery.TableInfo
+import com.google.cloud.bigquery.*
 import no.nav.tsm.ktor.logger
 
 private val logger = logger()
-
-private const val DATASET_ID = "tsm_kafka_sink"
-private val MIGRATIONS_TABLE = TableId.of(DATASET_ID, "_migrations")
 
 fun migrateDatabase(env: GcpConfig) {
     val bigQuery = BigQueryOptions.newBuilder()
@@ -25,19 +13,13 @@ fun migrateDatabase(env: GcpConfig) {
     val table = bigQuery.getTable(MIGRATIONS_TABLE)
     if (table == null) createMigrationsTable(bigQuery)
 
-    val currentSchemaVersion = bigQuery.query(
-        QueryJobConfiguration.newBuilder(
-            "SELECT schema_version FROM `${DATASET_ID}._migrations` ORDER BY last_updated DESC LIMIT 1"
-        ).build()
-    ).values.firstOrNull()?.get(0)?.longValue ?: 0L
+    val currentSchemaVersion = bigQuery.getCurrentSchemaVersion()
+    logger.info("Current schema version: $currentSchemaVersion")
 
-    logger.info("Current schema version: $currentSchemaVersion, TODO: run migrations")
-
-    /*
     when (currentSchemaVersion) {
-        0L -> V1_initial_schema(bigQuery)
+        // TODO: Håndtere manglende fall-throughs
+        0L -> v1InitialSchema(bigQuery)
     }
-    */
 }
 
 private fun createMigrationsTable(bigQuery: BigQuery) {
@@ -52,27 +34,46 @@ private fun createMigrationsTable(bigQuery: BigQuery) {
     val tableInfo = TableInfo.newBuilder(MIGRATIONS_TABLE, tableDefinition).build()
 
     bigQuery.create(tableInfo)
-    bigQuery.insertAll(
-        InsertAllRequest.newBuilder(MIGRATIONS_TABLE)
-            .addRow(mapOf("schema_version" to 0L, "last_updated" to System.currentTimeMillis() / 1000.0))
-            .build()
-    )
+    bigQuery.insertSchemaVersion(0)
 }
 
-private fun V1_initial_schema(bigQuery: BigQuery) {
+private fun v1InitialSchema(bigQuery: BigQuery) {
+    logger.info("Migrating to schema version 1")
+
     val schema = Schema.of(
-        Field.of("id", StandardSQLTypeName.STRING),
-        Field.of("data", StandardSQLTypeName.STRING),
-        Field.of("created_at", StandardSQLTypeName.TIMESTAMP),
+        nonNullableField("id", StandardSQLTypeName.STRING),
+        nonNullableField("fom", StandardSQLTypeName.DATE),
+        nonNullableField("tom", StandardSQLTypeName.DATE),
+        nonNullableField("type", StandardSQLTypeName.STRING),
+        nonNullableField("generert_dato", StandardSQLTypeName.DATE),
+        nonNullableField("nav_mottatt_dato", StandardSQLTypeName.DATE),
+        nonNullableField("regel_utfall", StandardSQLTypeName.STRING),
+        field("avsender_system", StandardSQLTypeName.STRING),
+        field("avsender_version", StandardSQLTypeName.STRING),
+        field("regelsett_versjon", StandardSQLTypeName.STRING),
+        field("behandler_hpr_nr", StandardSQLTypeName.STRING),
+        field("behandler_her_id", StandardSQLTypeName.STRING),
+        field("behandler_hpr_kategori", StandardSQLTypeName.STRING),
+        field("behandler_ident_sha256", StandardSQLTypeName.STRING),
+        nonNullableField("pasient_ident_sha256", StandardSQLTypeName.STRING),
     )
 
-    val tableDefinition = StandardTableDefinition.of(schema)
-    val tableInfo = TableInfo.newBuilder(TableId.of(DATASET_ID, "sykmeldinger"), tableDefinition).build()
+    val tableConstraint = TableConstraints.newBuilder().setPrimaryKey(
+        PrimaryKey.newBuilder().setColumns(listOf("id")).build()
+    ).build()
+
+    val tableDefinition = StandardTableDefinition.newBuilder()
+        .setSchema(schema)
+        .setTimePartitioning(TimePartitioning.newBuilder(TimePartitioning.Type.MONTH).setField("generert_dato").build())
+        .setTableConstraints(tableConstraint)
+        .build()
+
+    val tableInfo = TableInfo
+        .newBuilder(TableId.of(DATASET_ID, "sykmeldinger"), tableDefinition)
+        .build()
 
     bigQuery.create(tableInfo)
-    bigQuery.insertAll(
-        InsertAllRequest.newBuilder(MIGRATIONS_TABLE)
-            .addRow(mapOf("schema_version" to 1L, "last_updated" to System.currentTimeMillis() / 1000.0))
-            .build()
-    )
+    bigQuery.insertSchemaVersion(1)
+
+    logger.info("Migration to schema version 1 completed")
 }
