@@ -2,8 +2,12 @@
 kotlin = "2.4.0"
 logback = "1.6.1"
 logbackEncoder = "9.0"
+bigquery = "2.73.0"
 
 [libraries]
+# Database
+google-cloud-bigquery = { module = "com.google.cloud:google-cloud-bigquery", version.ref = "bigquery" }
+
 # Monitoring and observability
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logbackEncoder" }

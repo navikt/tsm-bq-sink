@@ -18,10 +18,12 @@ dependencies {
     implementation(ktorLibs.server.core)
     implementation(ktorLibs.server.netty)
     implementation(ktorLibs.server.di)
-    implementation(libs.logback.classic)
 
     implementation(tsmKtorLibs.core)
     implementation(tsmKtorLibs.kafka.sykmeldinger)
+
+    // Databases
+    implementation(libs.google.cloud.bigquery)
 
     // Monitoring and logging
     implementation(libs.logback.classic)
