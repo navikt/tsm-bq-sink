@@ -1,7 +1,7 @@
 rootProject.name = "tsm-bq-sink"
 
 val ktorVersion = "3.6.0"
-val tsmKtorVersion = "1.3.0"
+val tsmKtorVersion = "1.3.4"
 
 dependencyResolutionManagement {
     repositories {
