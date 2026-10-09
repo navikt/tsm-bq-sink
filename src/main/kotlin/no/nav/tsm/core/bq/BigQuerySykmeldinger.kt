@@ -15,10 +15,6 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.*
 
-sealed class BigQueryableDatatypes {
-    class EnumBoi()
-}
-
 val SYKMELDINGER_TABLE: TableId = TableId.of(DATASET_ID, "sykmeldinger")
 val SYKMELDINGER_UTENLANDSK_TABLE: TableId = TableId.of(DATASET_ID, "sykmeldinger_utenlandsk")
 
@@ -35,12 +31,18 @@ fun SykmeldingRecord.Utenlandsk.toUtenlandskRow(): Map<String, Any?> {
         "meta_avsender_version" to sykmelding.metadata.avsenderSystem.versjon,
         "pasient_ident_sha256" to sykmelding.pasient.fnr.shaIt(),
         "hoveddiagnose_kode" to sykmelding.medisinskVurdering.hovedDiagnose?.kode,
-        "hoveddiagnose_system" to sykmelding.medisinskVurdering.hovedDiagnose?.system,
+        "hoveddiagnose_system" to sykmelding.medisinskVurdering.hovedDiagnose?.system?.name,
         "hoveddiagnose_tekst" to sykmelding.medisinskVurdering.hovedDiagnose?.tekst,
-        "bidiagonser" to sykmelding.medisinskVurdering.biDiagnoser,
+        "bidiagnoser" to sykmelding.medisinskVurdering.biDiagnoser?.map {
+            mapOf(
+                "kode" to it.kode,
+                "system" to it.system.name,
+                "tekst" to it.tekst
+            )
+        },
         "svangerskapsrelatert" to sykmelding.medisinskVurdering.svangerskap,
         "skjermet_for_pasient" to sykmelding.medisinskVurdering.skjermetForPasient,
-        "yrkesskadedato" to sykmelding.medisinskVurdering.yrkesskade?.yrkesskadeDato,
+        "yrkesskadedato" to sykmelding.medisinskVurdering.yrkesskade?.yrkesskadeDato?.toString(),
         "meta_land" to sykmelding.utenlandskInfo.land,
     )
 }
@@ -73,10 +75,16 @@ fun SykmeldingRecord.toNasjonalRow(): Map<String, Any?> {
         "hoveddiagnose_kode" to sykmelding.medisinskVurdering.hovedDiagnose?.kode,
         "hoveddiagnose_system" to sykmelding.medisinskVurdering.hovedDiagnose?.system?.name,
         "hoveddiagnose_tekst" to sykmelding.medisinskVurdering.hovedDiagnose?.tekst,
-        "bidiagonser" to sykmelding.medisinskVurdering.biDiagnoser,
+        "bidiagnoser" to sykmelding.medisinskVurdering.biDiagnoser?.map {
+            mapOf(
+                "kode" to it.kode,
+                "system" to it.system.name,
+                "tekst" to it.tekst
+            )
+        },
         "svangerskapsrelatert" to sykmelding.medisinskVurdering.svangerskap,
         "skjermet_for_pasient" to sykmelding.medisinskVurdering.skjermetForPasient,
-        "yrkesskadedato" to sykmelding.medisinskVurdering.yrkesskade?.yrkesskadeDato,
+        "yrkesskadedato" to sykmelding.medisinskVurdering.yrkesskade?.yrkesskadeDato?.toString(),
         "behandler_hpr_nr" to sykmelding.behandler.ids.find { it.type == PersonIdType.HPR }?.id,
         "behandler_her_id" to sykmelding.behandler.ids.find { it.type == PersonIdType.HER }?.id,
         "behandler_ident_sha256" to sykmelding.behandler.ids.find { it.type == PersonIdType.FNR || it.type == PersonIdType.DNR }?.id?.shaIt(),

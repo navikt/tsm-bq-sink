@@ -15,6 +15,9 @@ fun nonNullableField(name: String, type: StandardSQLTypeName): Field =
 fun field(name: String, type: StandardSQLTypeName): Field =
     Field.newBuilder(name, type).setMode(Field.Mode.NULLABLE).build()
 
+fun repeated(name: String, vararg subfields: Field): Field =
+    Field.newBuilder(name, StandardSQLTypeName.STRUCT, *subfields).setMode(Field.Mode.REPEATED).build()
+
 fun GcpConfig.initBigQuery() = BigQueryOptions.newBuilder()
     .setProjectId(projectId)
     .setLocation("europe-north1")

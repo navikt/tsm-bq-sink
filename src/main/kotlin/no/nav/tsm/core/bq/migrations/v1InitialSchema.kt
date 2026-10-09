@@ -12,6 +12,7 @@ import no.nav.tsm.core.bq.SYKMELDINGER_TABLE
 import no.nav.tsm.core.bq.SYKMELDINGER_UTENLANDSK_TABLE
 import no.nav.tsm.core.bq.field
 import no.nav.tsm.core.bq.nonNullableField
+import no.nav.tsm.core.bq.repeated
 import no.nav.tsm.ktor.logger
 
 private val logger = logger()
@@ -34,7 +35,12 @@ val baseSchema = listOf(
     field("hoveddiagnose_kode", StandardSQLTypeName.STRING),
     field("hoveddiagnose_system", StandardSQLTypeName.STRING),
     field("hoveddiagnose_tekst", StandardSQLTypeName.STRING),
-    field("bidiagonser", StandardSQLTypeName.JSON), // JSON Array [{system,kode,tekst}]
+    repeated(
+        "bidiagnoser",
+        nonNullableField("kode", StandardSQLTypeName.STRING),
+        nonNullableField("system", StandardSQLTypeName.STRING),
+        field("tekst", StandardSQLTypeName.STRING)
+    ),
     field("svangerskapsrelatert", StandardSQLTypeName.BOOL),
     field("skjermet_for_pasient", StandardSQLTypeName.BOOL),
     field("yrkesskadedato", StandardSQLTypeName.DATE),

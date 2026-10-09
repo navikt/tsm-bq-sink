@@ -37,6 +37,12 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
             requireNotNull(table.getDefinition<StandardTableDefinition>().schema) { "Table $SYKMELDINGER_TABLE has no schema" }
 
         schema.fields.forEach { field ->
+            println("${field.name} ${field.type} (${field.mode}) = ${row.get(field.name).value}")
+            if (field.mode == Field.Mode.REPEATED) {
+                field.subFields.forEach { sf ->
+                    println("  ${sf.name} ${field.type} (${sf.mode}) = ${row.get(field.name).value}")
+                }
+            }
             if (field.mode == Field.Mode.REQUIRED) {
                 requireNotNull(row.get(field.name).value) { "Required field ${field.name} is null in the inserted row" }
             }
@@ -61,7 +67,8 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
             ).values.firstOrNull()
         ) { "Inserted row not found in BigQuery" }
 
-        val table = requireNotNull(bigQuery.getTable(SYKMELDINGER_UTENLANDSK_TABLE)) { "Table $SYKMELDINGER_UTENLANDSK_TABLE does not exist" }
+        val table =
+            requireNotNull(bigQuery.getTable(SYKMELDINGER_UTENLANDSK_TABLE)) { "Table $SYKMELDINGER_UTENLANDSK_TABLE does not exist" }
         val schema =
             requireNotNull(table.getDefinition<StandardTableDefinition>().schema) { "Table $SYKMELDINGER_UTENLANDSK_TABLE has no schema" }
 
@@ -90,8 +97,18 @@ private fun testSykmelding(id: String): SykmeldingRecord = SykmeldingRecord.Digi
             navnFastlege = null,
         ),
         medisinskVurdering = MedisinskVurdering.Digital(
-            hovedDiagnose = null,
-            biDiagnoser = null,
+            hovedDiagnose = DiagnoseInfo(
+                kode = "A01",
+                system = DiagnoseSystem.ICPC2,
+                tekst = "Test diagnose"
+            ),
+            biDiagnoser = listOf(
+                DiagnoseInfo(
+                    kode = "B02",
+                    system = DiagnoseSystem.ICD10,
+                    tekst = "Bi-diagnose test"
+                )
+            ),
             svangerskap = false,
             skjermetForPasient = false,
             yrkesskade = null,
