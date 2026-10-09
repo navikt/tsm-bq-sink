@@ -1,12 +1,12 @@
 package no.nav.tsm.plugins
 
-import io.ktor.server.application.Application
-import io.ktor.server.plugins.di.dependencies
+import io.ktor.server.application.*
+import io.ktor.server.plugins.di.*
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.migrateDatabase
+import no.nav.tsm.core.bq.runBigQueryMigrations
 
 fun Application.configureDatabase() {
     val env: Environment by dependencies
 
-    migrateDatabase(env.gcp)
+    runBigQueryMigrations(env.gcp)
 }

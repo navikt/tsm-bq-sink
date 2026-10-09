@@ -1,10 +1,10 @@
 package no.nav.tsm.kafka
 
 import com.google.cloud.bigquery.BigQuery
-import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.InsertAllRequest
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.SYKMELDINGER_TABLE
+import no.nav.tsm.core.bq.SYKMELDINGER_TABLE
+import no.nav.tsm.core.bq.initBigQuery
 import no.nav.tsm.ktor.kafka.consumer.RecordMeta
 import no.nav.tsm.sykmelding.input.core.model.Sykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
@@ -19,12 +19,9 @@ import java.util.*
 class SinkService(
     env: Environment
 ) {
-    private val bq: BigQuery = BigQueryOptions.newBuilder()
-        .setProjectId(env.gcp.projectId)
-        .setLocation("europe-north1")
-        .build().service
+    private val bq: BigQuery = env.gcp.initBigQuery()
 
-    fun insertRecordIntoBQ(record: SykmeldingRecord, meta: RecordMeta) {
+    fun insertRecordIntoBigQuery(record: SykmeldingRecord, meta: RecordMeta) {
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
             .addRow(meta.key, record.toBigQueryRow())
             .build()
@@ -38,7 +35,7 @@ class SinkService(
     /**
      * TODO:
      */
-    fun deleteRecord(key: String) {
+    fun deleteRecordFromBigQuery(key: String) {
         // doit
     }
 }
@@ -83,5 +80,5 @@ private fun String.shaIt(): String {
 }
 
 private fun OffsetDateTime.bqDateTime() = atZoneSameInstant(ZoneOffset.UTC)
-        .truncatedTo(ChronoUnit.SECONDS)
-        .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+    .truncatedTo(ChronoUnit.SECONDS)
+    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)

@@ -1,44 +1,21 @@
-package no.nav.tsm.core
+package no.nav.tsm.core.bq.migrations
 
-import com.google.cloud.bigquery.*
+import com.google.cloud.bigquery.BigQuery
+import com.google.cloud.bigquery.PrimaryKey
+import com.google.cloud.bigquery.Schema
+import com.google.cloud.bigquery.StandardSQLTypeName
+import com.google.cloud.bigquery.StandardTableDefinition
+import com.google.cloud.bigquery.TableConstraints
+import com.google.cloud.bigquery.TableInfo
+import com.google.cloud.bigquery.TimePartitioning
+import no.nav.tsm.core.bq.SYKMELDINGER_TABLE
+import no.nav.tsm.core.bq.field
+import no.nav.tsm.core.bq.nonNullableField
 import no.nav.tsm.ktor.logger
 
 private val logger = logger()
 
-fun migrateDatabase(env: GcpConfig) {
-    val bigQuery = BigQueryOptions.newBuilder()
-        .setProjectId(env.projectId)
-        .setLocation("europe-north1")
-        .build().service
-
-    val table = bigQuery.getTable(MIGRATIONS_TABLE)
-    if (table == null) createMigrationsTable(bigQuery)
-
-    val currentSchemaVersion = bigQuery.getCurrentSchemaVersion()
-    logger.info("Current schema version: $currentSchemaVersion")
-
-    when (currentSchemaVersion) {
-        // TODO: Håndtere manglende fall-throughs
-        0L -> v1InitialSchema(bigQuery)
-    }
-}
-
-private fun createMigrationsTable(bigQuery: BigQuery) {
-    logger.info("Fresh dataset, creating migrations table")
-
-    val schema = Schema.of(
-        Field.of("schema_version", StandardSQLTypeName.INT64),
-        Field.of("last_updated", StandardSQLTypeName.TIMESTAMP),
-    )
-
-    val tableDefinition = StandardTableDefinition.of(schema)
-    val tableInfo = TableInfo.newBuilder(MIGRATIONS_TABLE, tableDefinition).build()
-
-    bigQuery.create(tableInfo)
-    bigQuery.insertSchemaVersion(0)
-}
-
-private fun v1InitialSchema(bigQuery: BigQuery) {
+fun v1InitialSchema(bigQuery: BigQuery) {
     logger.info("Migrating to schema version 1")
 
     val schema = Schema.of(

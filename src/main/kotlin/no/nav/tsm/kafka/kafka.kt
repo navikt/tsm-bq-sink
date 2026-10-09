@@ -13,7 +13,7 @@ fun Application.configureKafka() {
     install(SykmeldingerConsumer) {
         clientId = env.runtime.name
         groupId = "tsm-bq-sink"
-        onRecord = { record, meta -> service.insertRecordIntoBQ(record, meta) }
-        onTombstone = { meta -> service.deleteRecord(meta.key) }
+        onRecord = { record, meta -> service.insertRecordIntoBigQuery(record, meta) }
+        onTombstone = { meta -> service.deleteRecordFromBigQuery(meta.key) }
     }
 }
