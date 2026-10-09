@@ -9,7 +9,7 @@ import com.google.cloud.bigquery.TableConstraints
 import com.google.cloud.bigquery.TableInfo
 import com.google.cloud.bigquery.TimePartitioning
 import no.nav.tsm.core.bq.SYKMELDINGER_TABLE
-import no.nav.tsm.core.bq.UTENLANDSK_SYKMELDINGER_TABLE
+import no.nav.tsm.core.bq.SYKMELDINGER_UTENLANDSK_TABLE
 import no.nav.tsm.core.bq.field
 import no.nav.tsm.core.bq.nonNullableField
 import no.nav.tsm.ktor.logger
@@ -86,6 +86,6 @@ fun v1InitialSchema(bigQuery: BigQuery) {
         .build()
 
     bigQuery.create(TableInfo.newBuilder(SYKMELDINGER_TABLE, nasjonalTableDefinition).build())
-    bigQuery.create(TableInfo.newBuilder(UTENLANDSK_SYKMELDINGER_TABLE, utenlandskTableDefinition).build())
+    bigQuery.create(TableInfo.newBuilder(SYKMELDINGER_UTENLANDSK_TABLE, utenlandskTableDefinition).build())
     bigQuery.insertSchemaVersion(1)
 }
