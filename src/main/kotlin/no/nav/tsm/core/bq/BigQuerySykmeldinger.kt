@@ -8,12 +8,10 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
 import no.nav.tsm.sykmelding.input.core.model.metadata.OrgIdType
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
-import java.security.MessageDigest
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.util.*
 
 val SYKMELDINGER_TABLE: TableId = TableId.of(DATASET_ID, "sykmeldinger")
 val SYKMELDINGER_UTENLANDSK_TABLE: TableId = TableId.of(DATASET_ID, "sykmeldinger_utenlandsk")
@@ -119,16 +117,6 @@ fun SykmeldingRecord.toNasjonalRow(): Map<String, Any?> {
 
         is SykmeldingMeta.Digital -> emptyMap()
     }
-}
-
-/**
- * Used for idents (fnr/dnr) to hash them before storing in BigQuery
- */
-private fun String.shaIt(): String {
-    val digest = MessageDigest.getInstance("SHA-256")
-        .digest(toByteArray(Charsets.UTF_8))
-
-    return HexFormat.of().formatHex(digest)
 }
 
 private fun OffsetDateTime.bqDateTime() = atZoneSameInstant(ZoneOffset.UTC)
