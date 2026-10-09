@@ -5,6 +5,7 @@ logbackEncoder = "9.0"
 bigquery = "2.73.0"
 
 # Testing
+mockk = "1.14.11"
 testcontainers = "2.0.5"
 
 [libraries]
@@ -16,6 +17,7 @@ logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "lo
 logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logbackEncoder" }
 
 # Testing
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 testcontainers-gcloud = { module = "org.testcontainers:testcontainers-gcloud", version.ref = "testcontainers" }
 
 [plugins]
