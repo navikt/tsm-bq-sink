@@ -4,6 +4,9 @@ logback = "1.6.1"
 logbackEncoder = "9.0"
 bigquery = "2.73.0"
 
+# Testing
+testcontainers = "2.0.5"
+
 [libraries]
 # Database
 google-cloud-bigquery = { module = "com.google.cloud:google-cloud-bigquery", version.ref = "bigquery" }
@@ -11,6 +14,9 @@ google-cloud-bigquery = { module = "com.google.cloud:google-cloud-bigquery", ver
 # Monitoring and observability
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 logback-encoder = { module = "net.logstash.logback:logstash-logback-encoder", version.ref = "logbackEncoder" }
+
+# Testing
+testcontainers-gcloud = { module = "org.testcontainers:testcontainers-gcloud", version.ref = "testcontainers" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

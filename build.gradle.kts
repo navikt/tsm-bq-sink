@@ -20,6 +20,7 @@ dependencies {
     implementation(ktorLibs.server.di)
 
     implementation(tsmKtorLibs.core)
+    implementation(tsmKtorLibs.kafka)
     implementation(tsmKtorLibs.kafka.sykmeldinger)
 
     // Databases
@@ -32,6 +33,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation(ktorLibs.server.testHost)
+    testImplementation(libs.testcontainers.gcloud)
 }
 
 tasks {
