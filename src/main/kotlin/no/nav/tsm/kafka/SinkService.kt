@@ -6,8 +6,8 @@ import no.nav.tsm.core.Environment
 import no.nav.tsm.core.bq.SYKMELDINGER_TABLE
 import no.nav.tsm.core.bq.SYKMELDINGER_UTENLANDSK_TABLE
 import no.nav.tsm.core.bq.initBigQuery
-import no.nav.tsm.core.bq.toNasjonalRow
-import no.nav.tsm.core.bq.toUtenlandskRow
+import no.nav.tsm.core.bq.toNasjonalBqPayload
+import no.nav.tsm.core.bq.toUtenlandskBqPayload
 import no.nav.tsm.ktor.kafka.consumer.RecordMeta
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 
@@ -19,11 +19,11 @@ class SinkService(
     fun insertRecordIntoBigQuery(record: SykmeldingRecord, meta: RecordMeta) {
         val request = if (record is SykmeldingRecord.Utenlandsk) {
             InsertAllRequest.newBuilder(SYKMELDINGER_UTENLANDSK_TABLE)
-                .addRow(meta.key, record.toUtenlandskRow())
+                .addRow(meta.key, record.toUtenlandskBqPayload().toContent())
                 .build()
         } else {
              InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
-                .addRow(meta.key, record.toNasjonalRow().toContent())
+                .addRow(meta.key, record.toNasjonalBqPayload().toContent())
                 .build()
         }
 

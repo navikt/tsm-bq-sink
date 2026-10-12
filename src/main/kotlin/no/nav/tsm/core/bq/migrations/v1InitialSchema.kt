@@ -26,8 +26,8 @@ val baseSchema = listOf(
     // Metadata
     nonNullableField("meta_generert_dato", StandardSQLTypeName.DATETIME),
     nonNullableField("meta_nav_mottatt_dato", StandardSQLTypeName.DATETIME),
-    field("meta_avsender_system", StandardSQLTypeName.STRING),
-    field("meta_avsender_version", StandardSQLTypeName.STRING),
+    nonNullableField("meta_avsender_system", StandardSQLTypeName.STRING),
+    nonNullableField("meta_avsender_version", StandardSQLTypeName.STRING),
     field("meta_regelsett_versjon", StandardSQLTypeName.STRING),
     // Pasient
     nonNullableField("pasient_ident_sha256", StandardSQLTypeName.STRING),
@@ -41,8 +41,8 @@ val baseSchema = listOf(
         nonNullableField("system", StandardSQLTypeName.STRING),
         field("tekst", StandardSQLTypeName.STRING)
     ),
-    field("svangerskapsrelatert", StandardSQLTypeName.BOOL),
-    field("skjermet_for_pasient", StandardSQLTypeName.BOOL),
+    nonNullableField("svangerskapsrelatert", StandardSQLTypeName.BOOL),
+    nonNullableField("skjermet_for_pasient", StandardSQLTypeName.BOOL),
     field("yrkesskadedato", StandardSQLTypeName.DATE),
     field("annen_fravers_arsak", StandardSQLTypeName.STRING),
     field("syketilfellet_start_dato", StandardSQLTypeName.STRING),
@@ -53,12 +53,12 @@ val baseSchema = listOf(
 val nasjonalSykmeldingSchema = Schema.of(
     baseSchema + listOf(
         // Metadata
-        field("meta_orgnummer", StandardSQLTypeName.STRING),
+        nonNullableField("meta_orgnummer", StandardSQLTypeName.STRING),
         // Behandler
         field("behandler_hpr_nr", StandardSQLTypeName.STRING),
         field("behandler_her_id", StandardSQLTypeName.STRING),
-        field("behandler_hpr_kategori", StandardSQLTypeName.STRING),
         field("behandler_ident_sha256", StandardSQLTypeName.STRING),
+        nonNullableField("behandler_hpr_kategori", StandardSQLTypeName.STRING),
     )
 )
 

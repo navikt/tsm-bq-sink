@@ -19,7 +19,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
         // Insert one sykmelding
         val sykmelding = testSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
-            .addRow(sykmelding.sykmelding.id, sykmelding.toNasjonalRow().toContent())
+            .addRow(sykmelding.sykmelding.id, sykmelding.toNasjonalBqPayload().toContent())
             .build()
 
         val response = bigQuery.insertAll(request)
@@ -54,7 +54,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
         // Insert one sykmelding
         val sykmelding: SykmeldingRecord.Utenlandsk = testUtenlandsk("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_UTENLANDSK_TABLE)
-            .addRow(sykmelding.sykmelding.id, sykmelding.toUtenlandskRow())
+            .addRow(sykmelding.sykmelding.id, sykmelding.toUtenlandskBqPayload().toContent())
             .build()
 
         val response = bigQuery.insertAll(request)
@@ -75,6 +75,32 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
         schema.fields.forEach { field ->
             if (field.mode == Field.Mode.REQUIRED) {
                 requireNotNull(row.get(field.name).value) { "Required field ${field.name} is null in the inserted row" }
+            }
+        }
+    }
+
+    @Test
+    fun `verify schema (digital) against BQ types`() {
+        val schema = getSchema(SYKMELDINGER_TABLE)
+        val mapped = testSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6").toNasjonalBqPayload()
+
+        val expectedMissingInDigital = listOf(
+            "meta_regelsett_versjon", "syketilfellet_start_dato",
+            // TODO: temporary until aktivitet is implemented in schema properly
+            "aktivitet"
+        )
+        schema.fields.forEach {
+            if (expectedMissingInDigital.contains(it.name)) {
+                println("Field ${it.name} is in the schema but not in the mapped payload, skipping")
+                return@forEach
+            }
+
+            val actual = requireNotNull(mapped.get(it.name)) {
+                "Field ${it.name} (${it.type}, ${it.mode}) is in the schema but not in the mapped payload"
+            }
+
+            if (it.mode == Field.Mode.NULLABLE) {
+                require(actual.NULLABLE) { "Field ${it.name} is nullable in the schema but not in the mapped payload" }
             }
         }
     }
