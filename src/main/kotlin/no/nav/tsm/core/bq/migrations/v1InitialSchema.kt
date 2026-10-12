@@ -17,7 +17,6 @@ val baseSchema = listOf(
     nonNullableField("meta_nav_mottatt_dato", StandardSQLTypeName.DATETIME),
     nonNullableField("meta_avsender_system", StandardSQLTypeName.STRING),
     nonNullableField("meta_avsender_version", StandardSQLTypeName.STRING),
-    nullableField("meta_regelsett_versjon", StandardSQLTypeName.STRING),
     // Pasient
     nonNullableField("pasient_ident_sha256", StandardSQLTypeName.STRING),
     // Medisinsk vurdering
@@ -33,7 +32,6 @@ val baseSchema = listOf(
     nonNullableField("svangerskapsrelatert", StandardSQLTypeName.BOOL),
     nonNullableField("skjermet_for_pasient", StandardSQLTypeName.BOOL),
     nullableField("yrkesskadedato", StandardSQLTypeName.DATE),
-    nullableField("annen_fravers_arsak", StandardSQLTypeName.STRING),
     nullableField("syketilfellet_start_dato", StandardSQLTypeName.STRING),
     // Aktivitet
     arrayOf("aktivitet", StandardSQLTypeName.JSON),
@@ -41,7 +39,10 @@ val baseSchema = listOf(
 
 val nasjonalSykmeldingSchema = Schema.of(
     baseSchema + listOf(
+        // Medisinsk vurdering
+        nullableField("annen_fravers_arsak", StandardSQLTypeName.STRING),
         // Metadata
+        nullableField("meta_regelsett_versjon", StandardSQLTypeName.STRING),
         nullableField("meta_orgnummer", StandardSQLTypeName.STRING),
         // Behandler
         nullableField("behandler_hpr_nr", StandardSQLTypeName.STRING),

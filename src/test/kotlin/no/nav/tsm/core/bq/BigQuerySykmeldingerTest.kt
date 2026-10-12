@@ -1,12 +1,7 @@
 package no.nav.tsm.core.bq
 
-import com.google.cloud.bigquery.Field
-import com.google.cloud.bigquery.InsertAllRequest
-import com.google.cloud.bigquery.LegacySQLTypeName
-import com.google.cloud.bigquery.QueryJobConfiguration
-import com.google.cloud.bigquery.StandardSQLTypeName
-import com.google.cloud.bigquery.StandardTableDefinition
-import no.nav.tsm.sykmelding.input.core.model.*
+import com.google.cloud.bigquery.*
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.utils.BigQueryTestContainer
 import no.nav.tsm.utils.testSykmelding
 import no.nav.tsm.utils.testUtenlandsk
@@ -95,6 +90,30 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
                 return@forEach
             }
 
+            val actual = requireNotNull(mapped.get(it.name)) {
+                "Field ${it.name} (${it.type}, ${it.mode}) is in the schema but not in the mapped payload"
+            }
+
+            when (it.mode) {
+                Field.Mode.NULLABLE -> {
+                    require(actual.bqProps.nullable) { "Field ${it.name} is nullable in the schema but not in the mapped payload" }
+                }
+
+                Field.Mode.REPEATED -> {
+                    require(actual.bqProps.repeated) { "Field ${it.name} is repeated in the schema but not in the mapped payload" }
+                }
+
+                else -> {}
+            }
+        }
+    }
+
+    @Test
+    fun `verify schema (utenlansk) against BQ types`() {
+        val schema = getSchema(SYKMELDINGER_UTENLANDSK_TABLE)
+        val mapped = testUtenlandsk("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6").toUtenlandskBqPayload()
+
+        schema.fields.forEach {
             val actual = requireNotNull(mapped.get(it.name)) {
                 "Field ${it.name} (${it.type}, ${it.mode}) is in the schema but not in the mapped payload"
             }
