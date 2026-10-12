@@ -45,7 +45,7 @@ fun SykmeldingRecord.Utenlandsk.toUtenlandskRow(): Map<String, Any?> {
     )
 }
 
-fun SykmeldingRecord.toNasjonalRow(): Map<String, Any?> {
+fun SykmeldingRecord.toNasjonalRow(): BqPayload {
     val sykmelding = this.sykmelding
     if (sykmelding !is Sykmelding.Nasjonal) {
         throw IllegalArgumentException("Cannot convert Utenlandsk sykmelding to Nasjonal row, use toUtenlandskRow() instead")
@@ -59,67 +59,74 @@ fun SykmeldingRecord.toNasjonalRow(): Map<String, Any?> {
     val medisinskVurdering = this.sykmelding.medisinskVurdering
     val sykmeldingMeta = this.sykmelding.metadata
 
-    return mapOf(
-        "id" to sykmelding.id,
-        "fom" to sykmelding.aktivitet.minOf { aktivitet -> aktivitet.fom }.toString(),
-        "tom" to sykmelding.aktivitet.maxOf { aktivitet -> aktivitet.tom }.toString(),
-        "type" to sykmelding.type.name,
-        "regelutfall" to validation.status.name,
-        "meta_generert_dato" to sykmelding.metadata.genDate.bqDateTime(),
-        "meta_nav_mottatt_dato" to sykmelding.metadata.mottattDato.bqDateTime(),
-        "meta_avsender_system" to sykmelding.metadata.avsenderSystem.navn,
-        "meta_avsender_version" to sykmelding.metadata.avsenderSystem.versjon,
-        "pasient_ident_sha256" to sykmelding.pasient.fnr.shaIt(),
-        "hoveddiagnose_kode" to sykmelding.medisinskVurdering.hovedDiagnose?.kode,
-        "hoveddiagnose_system" to sykmelding.medisinskVurdering.hovedDiagnose?.system?.name,
-        "hoveddiagnose_tekst" to sykmelding.medisinskVurdering.hovedDiagnose?.tekst,
-        "bidiagnoser" to sykmelding.medisinskVurdering.biDiagnoser?.map {
-            mapOf(
-                "kode" to it.kode,
-                "system" to it.system.name,
-                "tekst" to it.tekst
+    val base = BqPayload(
+        "id" to BqTypes.String(sykmelding.id),
+        "fom" to BqTypes.Date(sykmelding.aktivitet.minOf { aktivitet -> aktivitet.fom }),
+        "tom" to BqTypes.Date(sykmelding.aktivitet.maxOf { aktivitet -> aktivitet.tom }),
+        "type" to BqTypes.String(sykmelding.type.name),
+        "regelutfall" to BqTypes.String(validation.status.name),
+        "meta_generert_dato" to BqTypes.DateTime(sykmelding.metadata.genDate),
+        "meta_nav_mottatt_dato" to BqTypes.DateTime(sykmelding.metadata.mottattDato),
+        "meta_avsender_system" to BqTypes.String(sykmelding.metadata.avsenderSystem.navn),
+        "meta_avsender_version" to BqTypes.String(sykmelding.metadata.avsenderSystem.versjon),
+        "pasient_ident_sha256" to BqTypes.String(sykmelding.pasient.fnr.shaIt()),
+        "hoveddiagnose_kode" to BqTypes.String.Nullable(sykmelding.medisinskVurdering.hovedDiagnose?.kode),
+        "hoveddiagnose_system" to BqTypes.Enum.Nullable(sykmelding.medisinskVurdering.hovedDiagnose?.system),
+        "hoveddiagnose_tekst" to BqTypes.String.Nullable(sykmelding.medisinskVurdering.hovedDiagnose?.tekst),
+        "bidiagnoser" to BqTypes.Array.Nullable(sykmelding.medisinskVurdering.biDiagnoser?.map {
+            BqPayload(
+                "kode" to BqTypes.String(it.kode),
+                "system" to BqTypes.Enum(it.system),
+                "tekst" to BqTypes.String.Nullable(it.tekst)
             )
-        },
-        "svangerskapsrelatert" to sykmelding.medisinskVurdering.svangerskap,
-        "skjermet_for_pasient" to sykmelding.medisinskVurdering.skjermetForPasient,
-        "yrkesskadedato" to sykmelding.medisinskVurdering.yrkesskade?.yrkesskadeDato?.toString(),
-        "behandler_hpr_nr" to sykmelding.behandler.ids.find { it.type == PersonIdType.HPR }?.id,
-        "behandler_her_id" to sykmelding.behandler.ids.find { it.type == PersonIdType.HER }?.id,
-        "behandler_ident_sha256" to sykmelding.behandler.ids.find { it.type == PersonIdType.FNR || it.type == PersonIdType.DNR }?.id?.shaIt(),
-        "behandler_hpr_kategori" to sykmelding.sykmelder.helsepersonellKategori.name,
-    ) + when (medisinskVurdering) {
-        is MedisinskVurdering.Digital -> mapOf(
-            "annen_fravers_arsak" to medisinskVurdering.annenFravarsgrunn?.name
+        }),
+        "svangerskapsrelatert" to BqTypes.Boolean(sykmelding.medisinskVurdering.svangerskap),
+        "skjermet_for_pasient" to BqTypes.Boolean(sykmelding.medisinskVurdering.skjermetForPasient),
+        "yrkesskadedato" to BqTypes.Date.Nullable(sykmelding.medisinskVurdering.yrkesskade?.yrkesskadeDato),
+        "behandler_hpr_nr" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HPR }?.id),
+        "behandler_her_id" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HER }?.id),
+        "behandler_ident_sha256" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.FNR || it.type == PersonIdType.DNR }?.id?.shaIt()),
+        "behandler_hpr_kategori" to BqTypes.String(sykmelding.sykmelder.helsepersonellKategori.name),
+    )
+
+    when (medisinskVurdering) {
+        is MedisinskVurdering.Digital -> base.add(
+            "annen_fravers_arsak" to BqTypes.Enum.Nullable(medisinskVurdering.annenFravarsgrunn)
         )
 
-        is MedisinskVurdering.Legacy -> mapOf(
-            "syketilfellet_start_dato" to medisinskVurdering.syketilfelletStartDato.toString(),
-            "annen_fravers_arsak" to medisinskVurdering.annenFraversArsak?.arsak?.firstOrNull()?.name
+        is MedisinskVurdering.Legacy -> base.add(
+            "syketilfellet_start_dato" to BqTypes.Date.Nullable(medisinskVurdering.syketilfelletStartDato),
+            "annen_fravers_arsak" to BqTypes.Enum.Nullable(medisinskVurdering.annenFraversArsak?.arsak?.firstOrNull())
         )
-    } + when (recordMeta) {
-        is MessageMetadata.Digital -> mapOf(
-            "meta_orgnummer" to recordMeta.orgnummer
-        )
-
-        is MessageMetadata.Papir -> mapOf(
-            "meta_orgnummer" to recordMeta.sender.ids.find { it.type == OrgIdType.ENH }?.id
-        )
-
-        is MessageMetadata.Xml.Emottak -> mapOf(
-            "meta_orgnummer" to recordMeta.sender.ids.find { it.type == OrgIdType.ENH }?.id
-        )
-
-        is MessageMetadata.Xml.Egenmeldt -> emptyMap()
-    } + when (sykmeldingMeta) {
-        is SykmeldingMeta.Legacy -> mapOf(
-            "meta_regelsett_versjon" to sykmeldingMeta.regelsettVersjon,
-        )
-
-        is SykmeldingMeta.Digital -> emptyMap()
     }
+
+    when (recordMeta) {
+        is MessageMetadata.Digital -> base.add(
+            "meta_orgnummer" to BqTypes.String(recordMeta.orgnummer)
+        )
+
+        is MessageMetadata.Papir -> base.add(
+            "meta_orgnummer" to BqTypes.String.Nullable(recordMeta.sender.ids.find { it.type == OrgIdType.ENH }?.id)
+        )
+
+        is MessageMetadata.Xml.Emottak -> base.add(
+            "meta_orgnummer" to BqTypes.String.Nullable(recordMeta.sender.ids.find { it.type == OrgIdType.ENH }?.id)
+        )
+
+        is MessageMetadata.Xml.Egenmeldt -> {}
+    }
+
+    when (sykmeldingMeta) {
+        is SykmeldingMeta.Legacy -> base.add(
+            "meta_regelsett_versjon" to BqTypes.String.Nullable(sykmeldingMeta.regelsettVersjon),
+        )
+
+        is SykmeldingMeta.Digital -> {}
+    }
+
+    return base
 }
 
 private fun OffsetDateTime.bqDateTime() = atZoneSameInstant(ZoneOffset.UTC)
     .truncatedTo(ChronoUnit.SECONDS)
     .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
-
