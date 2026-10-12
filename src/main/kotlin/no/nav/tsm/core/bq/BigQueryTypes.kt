@@ -1,23 +1,28 @@
 package no.nav.tsm.core.bq
 
+import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
+import tools.jackson.module.kotlin.jacksonMapperBuilder
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+class BqProperties(
+    val name: String,
+    val nullable: Boolean,
+    val repeated: Boolean,
+)
+
 sealed interface BqTypes {
-    val BQ_SCHEMA_NAME: kotlin.String
-    val NULLABLE: kotlin.Boolean
+    val bqProps: BqProperties
 
     fun toBq(): Any?
 
     class String(val value: kotlin.String) : BqTypes {
-        override val BQ_SCHEMA_NAME = "STRING"
-        override val NULLABLE = false
+        override val bqProps = BqProperties("STRING", nullable = false, repeated = false)
 
         class Nullable(val value: kotlin.String?) : BqTypes {
-            override val BQ_SCHEMA_NAME = "STRING"
-            override val NULLABLE = true
+            override val bqProps = BqProperties("STRING", nullable = true, repeated = false)
 
             override fun toBq(): Any? = value
         }
@@ -26,12 +31,10 @@ sealed interface BqTypes {
     }
 
     class Boolean(val value: kotlin.Boolean) : BqTypes {
-        override val BQ_SCHEMA_NAME = "BOOLEAN"
-        override val NULLABLE = false
+        override val bqProps = BqProperties("BOOLEAN", nullable = false, repeated = false)
 
         class Nullable(val value: kotlin.Boolean?) : BqTypes {
-            override val BQ_SCHEMA_NAME = "BOOLEAN"
-            override val NULLABLE = true
+            override val bqProps = BqProperties("BOOLEAN", nullable = true, repeated = false)
 
             override fun toBq(): Any? = value
         }
@@ -41,6 +44,8 @@ sealed interface BqTypes {
 
 
     class DateTime(val value: OffsetDateTime) : BqTypes {
+        override val bqProps = BqProperties("DATETIME", nullable = false, repeated = false)
+
         /**
          * BigQuery does NOT want a zone identifier in the string, and it does NOT support more than
          * 6 digits of sub-second precision.
@@ -49,68 +54,67 @@ sealed interface BqTypes {
             .truncatedTo(ChronoUnit.SECONDS)
             .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
-        override val BQ_SCHEMA_NAME = "DATETIME"
-        override val NULLABLE = false
-
         override fun toBq(): Any = value.formatBqDateTime()
     }
 
     class Date(val value: java.time.LocalDate) : BqTypes {
         class Nullable(val value: java.time.LocalDate?) : BqTypes {
-            override val BQ_SCHEMA_NAME = "DATE"
-            override val NULLABLE = true
+            override val bqProps = BqProperties("DATE", nullable = true, repeated = false)
 
             override fun toBq(): Any? = value?.toString()
         }
 
-        override val BQ_SCHEMA_NAME = "DATE"
-        override val NULLABLE = false
+        override val bqProps = BqProperties("DATE", nullable = false, repeated = false)
 
         override fun toBq(): Any = value.toString()
     }
 
     class Enum(val value: kotlin.Enum<*>) : BqTypes {
         class Nullable(val value: kotlin.Enum<*>?) : BqTypes {
-            override val BQ_SCHEMA_NAME = "STRING"
-            override val NULLABLE = true
+            override val bqProps = BqProperties("STRING", nullable = true, repeated = false)
 
             override fun toBq(): Any? = value?.name
         }
 
-        override val BQ_SCHEMA_NAME = "STRING"
-        override val NULLABLE = false
+        override val bqProps = BqProperties("STRING", nullable = false, repeated = false)
 
         override fun toBq(): Any = value.name
     }
 
     class SubRecord(val value: BqPayload) : BqTypes {
         class Nullable(val value: BqPayload?) : BqTypes {
-            override val BQ_SCHEMA_NAME = "STRUCT"
-            override val NULLABLE = true
+            override val bqProps = BqProperties("STRUCT", nullable = true, repeated = false)
 
             override fun toBq(): Any? = value?.toContent()
         }
 
-        override val BQ_SCHEMA_NAME = "STRUCT"
-        override val NULLABLE = false
+        override val bqProps = BqProperties("STRUCT", nullable = false, repeated = false)
 
         override fun toBq(): Any = value.toContent()
     }
 
-    class Array(val value: List<BqPayload>) : BqTypes {
-        // TODO: repeated struct??
-        override val BQ_SCHEMA_NAME = "STRUCT"
-        override val NULLABLE = false
+    class RecordArray(val value: List<BqPayload>) : BqTypes {
+        override val bqProps = BqProperties("STRUCT", nullable = false, repeated = true)
 
         class Nullable(val value: List<BqPayload>?) : BqTypes {
-            // TODO: repeated struct??
-            override val BQ_SCHEMA_NAME = "STRUCT"
-            override val NULLABLE = true
+            override val bqProps = BqProperties("STRUCT", nullable = true, repeated = true)
 
             override fun toBq(): Any? = value?.map { it.toContent() }
         }
 
         override fun toBq(): Any = value.map { it.toContent() }
+    }
+
+    class JsonArray<JsonType>(val value: List<JsonType>) : BqTypes {
+        override val bqProps = BqProperties("JSON", nullable = false, repeated = true)
+
+        class Nullable<JsonType>(val value: List<JsonType>?) : BqTypes {
+            override val bqProps = BqProperties("JSON", nullable = true, repeated = true)
+
+            override fun toBq(): List<Any?> = value?.map { mapper.writeValueAsString(it) } ?: emptyList()
+        }
+
+        override fun toBq(): List<Any> = value.map { mapper.writeValueAsString(it) }
     }
 }
 
@@ -129,3 +133,5 @@ class BqPayload(vararg fields: Pair<String, BqTypes>) {
 
     fun get(name: String): BqTypes? = fields[name]
 }
+
+private val mapper = jacksonMapperBuilder().addModule(SykmeldingModule()).build()

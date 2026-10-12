@@ -8,10 +8,6 @@ import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
 import no.nav.tsm.sykmelding.input.core.model.metadata.OrgIdType
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 
 val SYKMELDINGER_TABLE: TableId = TableId.of(DATASET_ID, "sykmeldinger")
 val SYKMELDINGER_UTENLANDSK_TABLE: TableId = TableId.of(DATASET_ID, "sykmeldinger_utenlandsk")
@@ -31,7 +27,7 @@ fun SykmeldingRecord.Utenlandsk.toUtenlandskBqPayload(): BqPayload {
         "hoveddiagnose_kode" to BqTypes.String.Nullable(sykmelding.medisinskVurdering.hovedDiagnose?.kode),
         "hoveddiagnose_system" to BqTypes.Enum.Nullable(sykmelding.medisinskVurdering.hovedDiagnose?.system),
         "hoveddiagnose_tekst" to BqTypes.String.Nullable(sykmelding.medisinskVurdering.hovedDiagnose?.tekst),
-        "bidiagnoser" to BqTypes.Array.Nullable(sykmelding.medisinskVurdering.biDiagnoser?.map {
+        "bidiagnoser" to BqTypes.RecordArray.Nullable(sykmelding.medisinskVurdering.biDiagnoser?.map {
             BqPayload(
                 "kode" to BqTypes.String(it.kode),
                 "system" to BqTypes.Enum(it.system),
@@ -65,6 +61,7 @@ fun SykmeldingRecord.toNasjonalBqPayload(): BqPayload {
         "tom" to BqTypes.Date(sykmelding.aktivitet.maxOf { aktivitet -> aktivitet.tom }),
         "type" to BqTypes.String(sykmelding.type.name),
         "regelutfall" to BqTypes.String(validation.status.name),
+        "aktivitet" to BqTypes.JsonArray(sykmelding.aktivitet),
         "meta_generert_dato" to BqTypes.DateTime(sykmelding.metadata.genDate),
         "meta_nav_mottatt_dato" to BqTypes.DateTime(sykmelding.metadata.mottattDato),
         "meta_avsender_system" to BqTypes.String(sykmelding.metadata.avsenderSystem.navn),
@@ -73,7 +70,7 @@ fun SykmeldingRecord.toNasjonalBqPayload(): BqPayload {
         "hoveddiagnose_kode" to BqTypes.String.Nullable(sykmelding.medisinskVurdering.hovedDiagnose?.kode),
         "hoveddiagnose_system" to BqTypes.Enum.Nullable(sykmelding.medisinskVurdering.hovedDiagnose?.system),
         "hoveddiagnose_tekst" to BqTypes.String.Nullable(sykmelding.medisinskVurdering.hovedDiagnose?.tekst),
-        "bidiagnoser" to BqTypes.Array.Nullable(sykmelding.medisinskVurdering.biDiagnoser?.map {
+        "bidiagnoser" to BqTypes.RecordArray.Nullable(sykmelding.medisinskVurdering.biDiagnoser?.map {
             BqPayload(
                 "kode" to BqTypes.String(it.kode),
                 "system" to BqTypes.Enum(it.system),
@@ -126,7 +123,3 @@ fun SykmeldingRecord.toNasjonalBqPayload(): BqPayload {
 
     return base
 }
-
-private fun OffsetDateTime.bqDateTime() = atZoneSameInstant(ZoneOffset.UTC)
-    .truncatedTo(ChronoUnit.SECONDS)
-    .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
