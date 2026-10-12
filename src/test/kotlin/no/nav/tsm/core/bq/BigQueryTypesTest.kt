@@ -1,12 +1,7 @@
 package no.nav.tsm.core.bq
 
-import no.nav.tsm.sykmelding.input.core.model.Aktivitet
-import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsak
-import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
-import no.nav.tsm.sykmelding.input.core.model.MedisinskArsak
-import no.nav.tsm.sykmelding.input.core.model.MedisinskArsakType
+import no.nav.tsm.sykmelding.input.core.model.*
 import org.junit.Test
-import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
 

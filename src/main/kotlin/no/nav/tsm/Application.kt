@@ -1,7 +1,7 @@
 package no.nav.tsm
 
-import io.ktor.server.application.Application
-import io.ktor.server.netty.EngineMain
+import io.ktor.server.application.*
+import io.ktor.server.netty.*
 import no.nav.tsm.kafka.configureKafka
 import no.nav.tsm.plugins.configureDatabase
 import no.nav.tsm.plugins.configureDependencies

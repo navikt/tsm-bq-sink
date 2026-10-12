@@ -1,6 +1,6 @@
 package no.nav.tsm.core
 
-import io.ktor.server.config.ApplicationConfig
+import io.ktor.server.config.*
 import no.nav.tsm.ktor.nais.RuntimeCluster
 import no.nav.tsm.ktor.nais.getRuntimeCluster
 

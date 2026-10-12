@@ -1,7 +1,7 @@
 package no.nav.tsm.core.bq
 
 import java.security.MessageDigest
-import java.util.HexFormat
+import java.util.*
 
 /**
  * Used for idents (fnr/dnr) to hash them before storing in BigQuery

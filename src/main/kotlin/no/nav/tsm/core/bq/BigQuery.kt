@@ -12,13 +12,13 @@ const val DATASET_ID = "tsm_kafka_sink"
 fun nonNullableField(name: String, type: StandardSQLTypeName): Field =
     Field.newBuilder(name, type).setMode(Field.Mode.REQUIRED).build()
 
-fun field(name: String, type: StandardSQLTypeName): Field =
+fun nullableField(name: String, type: StandardSQLTypeName): Field =
     Field.newBuilder(name, type).setMode(Field.Mode.NULLABLE).build()
 
-fun arrayOf(name: String, vararg subfields: Field): Field =
+fun arrayRecord(name: String, vararg subfields: Field): Field =
     Field.newBuilder(name, StandardSQLTypeName.STRUCT, *subfields).setMode(Field.Mode.REPEATED).build()
 
-fun array(name: String, type: StandardSQLTypeName): Field =
+fun arrayOf(name: String, type: StandardSQLTypeName): Field =
     Field.newBuilder(name, type).setMode(Field.Mode.REPEATED).build()
 
 fun GcpConfig.initBigQuery() = BigQueryOptions.newBuilder()

@@ -99,7 +99,7 @@ fun SykmeldingRecord.toNasjonalBqPayload(): BqPayload {
 
     when (recordMeta) {
         is MessageMetadata.Digital -> base.add(
-            "meta_orgnummer" to BqTypes.String(recordMeta.orgnummer)
+            "meta_orgnummer" to BqTypes.String.Nullable(recordMeta.orgnummer)
         )
 
         is MessageMetadata.Papir -> base.add(

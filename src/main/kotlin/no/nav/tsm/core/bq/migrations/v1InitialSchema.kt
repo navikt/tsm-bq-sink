@@ -1,19 +1,7 @@
 package no.nav.tsm.core.bq.migrations
 
-import com.google.cloud.bigquery.BigQuery
-import com.google.cloud.bigquery.PrimaryKey
-import com.google.cloud.bigquery.Schema
-import com.google.cloud.bigquery.StandardSQLTypeName
-import com.google.cloud.bigquery.StandardTableDefinition
-import com.google.cloud.bigquery.TableConstraints
-import com.google.cloud.bigquery.TableInfo
-import com.google.cloud.bigquery.TimePartitioning
-import no.nav.tsm.core.bq.SYKMELDINGER_TABLE
-import no.nav.tsm.core.bq.SYKMELDINGER_UTENLANDSK_TABLE
-import no.nav.tsm.core.bq.array
-import no.nav.tsm.core.bq.field
-import no.nav.tsm.core.bq.nonNullableField
-import no.nav.tsm.core.bq.arrayOf
+import com.google.cloud.bigquery.*
+import no.nav.tsm.core.bq.*
 import no.nav.tsm.ktor.logger
 
 private val logger = logger()
@@ -29,36 +17,36 @@ val baseSchema = listOf(
     nonNullableField("meta_nav_mottatt_dato", StandardSQLTypeName.DATETIME),
     nonNullableField("meta_avsender_system", StandardSQLTypeName.STRING),
     nonNullableField("meta_avsender_version", StandardSQLTypeName.STRING),
-    field("meta_regelsett_versjon", StandardSQLTypeName.STRING),
+    nullableField("meta_regelsett_versjon", StandardSQLTypeName.STRING),
     // Pasient
     nonNullableField("pasient_ident_sha256", StandardSQLTypeName.STRING),
     // Medisinsk vurdering
-    field("hoveddiagnose_kode", StandardSQLTypeName.STRING),
-    field("hoveddiagnose_system", StandardSQLTypeName.STRING),
-    field("hoveddiagnose_tekst", StandardSQLTypeName.STRING),
-    arrayOf(
+    nullableField("hoveddiagnose_kode", StandardSQLTypeName.STRING),
+    nullableField("hoveddiagnose_system", StandardSQLTypeName.STRING),
+    nullableField("hoveddiagnose_tekst", StandardSQLTypeName.STRING),
+    arrayRecord(
         "bidiagnoser",
         nonNullableField("kode", StandardSQLTypeName.STRING),
         nonNullableField("system", StandardSQLTypeName.STRING),
-        field("tekst", StandardSQLTypeName.STRING)
+        nullableField("tekst", StandardSQLTypeName.STRING)
     ),
     nonNullableField("svangerskapsrelatert", StandardSQLTypeName.BOOL),
     nonNullableField("skjermet_for_pasient", StandardSQLTypeName.BOOL),
-    field("yrkesskadedato", StandardSQLTypeName.DATE),
-    field("annen_fravers_arsak", StandardSQLTypeName.STRING),
-    field("syketilfellet_start_dato", StandardSQLTypeName.STRING),
+    nullableField("yrkesskadedato", StandardSQLTypeName.DATE),
+    nullableField("annen_fravers_arsak", StandardSQLTypeName.STRING),
+    nullableField("syketilfellet_start_dato", StandardSQLTypeName.STRING),
     // Aktivitet
-    array("aktivitet", StandardSQLTypeName.JSON),
+    arrayOf("aktivitet", StandardSQLTypeName.JSON),
 )
 
 val nasjonalSykmeldingSchema = Schema.of(
     baseSchema + listOf(
         // Metadata
-        nonNullableField("meta_orgnummer", StandardSQLTypeName.STRING),
+        nullableField("meta_orgnummer", StandardSQLTypeName.STRING),
         // Behandler
-        field("behandler_hpr_nr", StandardSQLTypeName.STRING),
-        field("behandler_her_id", StandardSQLTypeName.STRING),
-        field("behandler_ident_sha256", StandardSQLTypeName.STRING),
+        nullableField("behandler_hpr_nr", StandardSQLTypeName.STRING),
+        nullableField("behandler_her_id", StandardSQLTypeName.STRING),
+        nullableField("behandler_ident_sha256", StandardSQLTypeName.STRING),
         nonNullableField("behandler_hpr_kategori", StandardSQLTypeName.STRING),
     )
 )
