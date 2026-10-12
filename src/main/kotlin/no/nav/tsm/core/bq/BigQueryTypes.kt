@@ -7,14 +7,17 @@ import java.time.temporal.ChronoUnit
 
 sealed interface BqTypes {
     val BQ_SCHEMA_NAME: kotlin.String
+    val NULLABLE: kotlin.Boolean
 
     fun toBq(): Any?
 
     class String(val value: kotlin.String) : BqTypes {
         override val BQ_SCHEMA_NAME = "STRING"
+        override val NULLABLE = false
 
         class Nullable(val value: kotlin.String?) : BqTypes {
             override val BQ_SCHEMA_NAME = "STRING"
+            override val NULLABLE = true
 
             override fun toBq(): Any? = value
         }
@@ -24,9 +27,11 @@ sealed interface BqTypes {
 
     class Boolean(val value: kotlin.Boolean) : BqTypes {
         override val BQ_SCHEMA_NAME = "BOOLEAN"
+        override val NULLABLE = false
 
         class Nullable(val value: kotlin.Boolean?) : BqTypes {
             override val BQ_SCHEMA_NAME = "BOOLEAN"
+            override val NULLABLE = true
 
             override fun toBq(): Any? = value
         }
@@ -45,6 +50,7 @@ sealed interface BqTypes {
             .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
         override val BQ_SCHEMA_NAME = "DATETIME"
+        override val NULLABLE = false
 
         override fun toBq(): Any = value.formatBqDateTime()
     }
@@ -52,11 +58,13 @@ sealed interface BqTypes {
     class Date(val value: java.time.LocalDate) : BqTypes {
         class Nullable(val value: java.time.LocalDate?) : BqTypes {
             override val BQ_SCHEMA_NAME = "DATE"
+            override val NULLABLE = true
 
             override fun toBq(): Any? = value?.toString()
         }
 
         override val BQ_SCHEMA_NAME = "DATE"
+        override val NULLABLE = false
 
         override fun toBq(): Any = value.toString()
     }
@@ -64,11 +72,13 @@ sealed interface BqTypes {
     class Enum(val value: kotlin.Enum<*>) : BqTypes {
         class Nullable(val value: kotlin.Enum<*>?) : BqTypes {
             override val BQ_SCHEMA_NAME = "STRING"
+            override val NULLABLE = true
 
             override fun toBq(): Any? = value?.name
         }
 
         override val BQ_SCHEMA_NAME = "STRING"
+        override val NULLABLE = false
 
         override fun toBq(): Any = value.name
     }
@@ -76,11 +86,13 @@ sealed interface BqTypes {
     class SubRecord(val value: BqPayload) : BqTypes {
         class Nullable(val value: BqPayload?) : BqTypes {
             override val BQ_SCHEMA_NAME = "STRUCT"
+            override val NULLABLE = true
 
             override fun toBq(): Any? = value?.toContent()
         }
 
         override val BQ_SCHEMA_NAME = "STRUCT"
+        override val NULLABLE = false
 
         override fun toBq(): Any = value.toContent()
     }
@@ -88,10 +100,12 @@ sealed interface BqTypes {
     class Array(val value: List<BqPayload>) : BqTypes {
         // TODO: repeated struct??
         override val BQ_SCHEMA_NAME = "STRUCT"
+        override val NULLABLE = false
 
         class Nullable(val value: List<BqPayload>?) : BqTypes {
             // TODO: repeated struct??
             override val BQ_SCHEMA_NAME = "STRUCT"
+            override val NULLABLE = true
 
             override fun toBq(): Any? = value?.map { it.toContent() }
         }
@@ -112,4 +126,6 @@ class BqPayload(vararg fields: Pair<String, BqTypes>) {
 
         return this
     }
+
+    fun get(name: String): BqTypes? = fields[name]
 }

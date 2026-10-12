@@ -3,6 +3,10 @@ package no.nav.tsm.utils
 import com.google.cloud.NoCredentials
 import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.BigQueryOptions
+import com.google.cloud.bigquery.Schema
+import com.google.cloud.bigquery.StandardTableDefinition
+import com.google.cloud.bigquery.TableId
+import no.nav.tsm.core.bq.SYKMELDINGER_TABLE
 import no.nav.tsm.core.bq.migrations.applyMigrations
 import no.nav.tsm.core.bq.migrations.ensureMigrationsTable
 import org.testcontainers.gcloud.BigQueryEmulatorContainer
@@ -31,5 +35,13 @@ abstract class BigQueryTestContainer {
             ensureMigrationsTable(bigQuery)
             applyMigrations(bigQuery)
         }
+    }
+
+    fun getSchema(table: TableId): Schema {
+        val table = requireNotNull(bigQuery.getTable(table)) { "Table $table does not exist" }
+        val schema =
+            requireNotNull(table.getDefinition<StandardTableDefinition>().schema) { "Table $table has no schema" }
+
+        return schema
     }
 }
