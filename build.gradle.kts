@@ -18,6 +18,7 @@ dependencies {
     implementation(ktorLibs.server.core)
     implementation(ktorLibs.server.netty)
     implementation(ktorLibs.server.di)
+    implementation(ktorLibs.serialization.jackson3)
 
     implementation(tsmKtorLibs.core)
     implementation(tsmKtorLibs.kafka)

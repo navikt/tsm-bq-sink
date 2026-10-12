@@ -10,9 +10,10 @@ import com.google.cloud.bigquery.TableInfo
 import com.google.cloud.bigquery.TimePartitioning
 import no.nav.tsm.core.bq.SYKMELDINGER_TABLE
 import no.nav.tsm.core.bq.SYKMELDINGER_UTENLANDSK_TABLE
+import no.nav.tsm.core.bq.array
 import no.nav.tsm.core.bq.field
 import no.nav.tsm.core.bq.nonNullableField
-import no.nav.tsm.core.bq.repeated
+import no.nav.tsm.core.bq.arrayOf
 import no.nav.tsm.ktor.logger
 
 private val logger = logger()
@@ -35,7 +36,7 @@ val baseSchema = listOf(
     field("hoveddiagnose_kode", StandardSQLTypeName.STRING),
     field("hoveddiagnose_system", StandardSQLTypeName.STRING),
     field("hoveddiagnose_tekst", StandardSQLTypeName.STRING),
-    repeated(
+    arrayOf(
         "bidiagnoser",
         nonNullableField("kode", StandardSQLTypeName.STRING),
         nonNullableField("system", StandardSQLTypeName.STRING),
@@ -47,7 +48,7 @@ val baseSchema = listOf(
     field("annen_fravers_arsak", StandardSQLTypeName.STRING),
     field("syketilfellet_start_dato", StandardSQLTypeName.STRING),
     // Aktivitet
-    field("aktivitet", StandardSQLTypeName.JSON),
+    array("aktivitet", StandardSQLTypeName.JSON),
 )
 
 val nasjonalSykmeldingSchema = Schema.of(
@@ -68,6 +69,11 @@ val utenlandskSykmeldingSchema = Schema.of(
     )
 )
 
+/**
+ * Do NOT edit this function. Any new changes NEEDS to be done in a new changeset.
+ *
+ * Pretend this is a flyway migration.
+ */
 fun v1InitialSchema(bigQuery: BigQuery) {
     logger.info("Migrating to schema version 1")
 

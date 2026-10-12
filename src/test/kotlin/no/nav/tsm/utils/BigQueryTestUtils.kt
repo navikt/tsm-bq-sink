@@ -1,12 +1,7 @@
 package no.nav.tsm.utils
 
 import com.google.cloud.NoCredentials
-import com.google.cloud.bigquery.BigQuery
-import com.google.cloud.bigquery.BigQueryOptions
-import com.google.cloud.bigquery.Schema
-import com.google.cloud.bigquery.StandardTableDefinition
-import com.google.cloud.bigquery.TableId
-import no.nav.tsm.core.bq.SYKMELDINGER_TABLE
+import com.google.cloud.bigquery.*
 import no.nav.tsm.core.bq.migrations.applyMigrations
 import no.nav.tsm.core.bq.migrations.ensureMigrationsTable
 import org.testcontainers.gcloud.BigQueryEmulatorContainer
@@ -29,7 +24,7 @@ abstract class BigQueryTestContainer {
                 .service
 
             // Nais creates the dataset for us, so for testing we'll need to create it manually
-            bigQuery.create(com.google.cloud.bigquery.DatasetInfo.newBuilder("tsm_kafka_sink").build())
+            bigQuery.create(DatasetInfo.newBuilder("tsm_kafka_sink").build())
 
             // Run the migrations
             ensureMigrationsTable(bigQuery)

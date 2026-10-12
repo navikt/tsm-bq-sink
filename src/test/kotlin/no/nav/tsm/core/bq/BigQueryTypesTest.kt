@@ -1,12 +1,17 @@
 package no.nav.tsm.core.bq
 
+import no.nav.tsm.sykmelding.input.core.model.Aktivitet
+import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsak
+import no.nav.tsm.sykmelding.input.core.model.ArbeidsrelatertArsakType
+import no.nav.tsm.sykmelding.input.core.model.MedisinskArsak
+import no.nav.tsm.sykmelding.input.core.model.MedisinskArsakType
 import org.junit.Test
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
 
 
-class BqTypesTest {
-
+class BigQueryTypesTest {
     @Test
     fun `test a complete BqPayload`() {
         val payload = BqPayload(
@@ -16,6 +21,28 @@ class BqTypesTest {
             "dateTimeField" to BqTypes.DateTime(OffsetDateTime.parse("2024-06-01T14:34:56.123456789+02:00")),
             "dateField" to BqTypes.Date(java.time.LocalDate.parse("2024-06-01")),
             "nullableDateField" to BqTypes.Date.Nullable(null),
+            "jsonArray" to BqTypes.JsonArray(
+                listOf(
+                    Aktivitet.Gradert(
+                        fom = java.time.LocalDate.parse("2024-06-01"),
+                        tom = java.time.LocalDate.parse("2024-06-15"),
+                        grad = 50,
+                        reisetilskudd = false
+                    ),
+                    Aktivitet.IkkeMulig(
+                        fom = java.time.LocalDate.parse("2024-06-16"),
+                        tom = java.time.LocalDate.parse("2024-06-30"),
+                        medisinskArsak = MedisinskArsak(
+                            beskrivelse = "Test description",
+                            arsak = listOf(MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING)
+                        ),
+                        arbeidsrelatertArsak = ArbeidsrelatertArsak(
+                            beskrivelse = "Test description",
+                            arsak = listOf(ArbeidsrelatertArsakType.ANNET)
+                        )
+                    )
+                )
+            ),
             "enumField" to BqTypes.Enum(TestEnum.VALUE1),
             "nullableEnumField" to BqTypes.Enum.Nullable(null),
             "subRecordField" to BqTypes.SubRecord(
@@ -25,7 +52,7 @@ class BqTypesTest {
                 )
             ),
             "nullableSubRecordField" to BqTypes.SubRecord.Nullable(null),
-            "subRecordArrayField" to BqTypes.Array(
+            "subRecordArrayField" to BqTypes.RecordArray(
                 listOf(
                     BqPayload(
                         "nestedString" to BqTypes.String("nestedValue1"),
@@ -37,7 +64,7 @@ class BqTypesTest {
                     )
                 ),
             ),
-            "nullableSubRecordArrayField" to BqTypes.Array.Nullable(null)
+            "nullableSubRecordArrayField" to BqTypes.RecordArray.Nullable(null)
         )
 
         val expectedMap = mapOf(
@@ -46,6 +73,10 @@ class BqTypesTest {
             "dateTimeField" to "2024-06-01T12:34:56",
             "dateField" to "2024-06-01",
             "nullableDateField" to null,
+            "jsonArray" to listOf(
+                """{"grad":50,"fom":"2024-06-01","tom":"2024-06-15","reisetilskudd":false,"type":"GRADERT"}""",
+                """{"medisinskArsak":{"beskrivelse":"Test description","arsak":["AKTIVITET_FORHINDRER_BEDRING"]},"arbeidsrelatertArsak":{"beskrivelse":"Test description","arsak":["ANNET"]},"fom":"2024-06-16","tom":"2024-06-30","type":"AKTIVITET_IKKE_MULIG"}"""
+            ),
             "enumField" to "VALUE1",
             "nullableEnumField" to null,
             "subRecordField" to mapOf(
