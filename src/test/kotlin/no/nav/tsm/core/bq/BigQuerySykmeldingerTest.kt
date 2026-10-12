@@ -19,7 +19,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
         // Insert one sykmelding
         val sykmelding = testSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
-            .addRow(sykmelding.sykmelding.id, sykmelding.toNasjonalRow())
+            .addRow(sykmelding.sykmelding.id, sykmelding.toNasjonalRow().toContent())
             .build()
 
         val response = bigQuery.insertAll(request)

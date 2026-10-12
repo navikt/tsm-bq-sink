@@ -23,7 +23,7 @@ class SinkService(
                 .build()
         } else {
              InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
-                .addRow(meta.key, record.toNasjonalRow())
+                .addRow(meta.key, record.toNasjonalRow().toContent())
                 .build()
         }
 
