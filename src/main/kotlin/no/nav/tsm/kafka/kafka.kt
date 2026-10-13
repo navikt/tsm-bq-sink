@@ -29,7 +29,7 @@ fun Application.configureKafka() {
 
                 when (env.runtime.env) {
                     RuntimeCluster.DEV -> {
-                        logger.warn("Skipping record with key ${meta.key} because we are in DEV environment")
+                        logger.warn("Skipping record with key ${meta.key} because we are in DEV environment", ex)
                         true
                     }
                     else -> false
