@@ -94,10 +94,10 @@ fun SykmeldingRecord.toNasjonalBqPayload(): BqPayload {
     }
 
     val payload = this.toCommonBqPayload().add(
-        "behandler_hpr_nr" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HPR }?.id),
-        "behandler_her_id" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HER }?.id),
+        "behandler_hpr_nr" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HPR }?.id?.trim()),
+        "behandler_her_id" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HER }?.id?.trim()),
         "behandler_ident_sha256" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.FNR || it.type == PersonIdType.DNR }?.id?.shaIt()),
-        "behandler_hpr_kategori" to BqTypes.String(sykmelding.sykmelder.helsepersonellKategori.name),
+        "behandler_hpr_kategori" to BqTypes.Enum(sykmelding.sykmelder.helsepersonellKategori),
     )
 
     return payload

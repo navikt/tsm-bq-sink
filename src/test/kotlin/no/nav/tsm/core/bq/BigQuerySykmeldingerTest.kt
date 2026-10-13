@@ -3,8 +3,9 @@ package no.nav.tsm.core.bq
 import com.google.cloud.bigquery.*
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.utils.BigQueryTestContainer
-import no.nav.tsm.utils.testSykmelding
-import no.nav.tsm.utils.testUtenlandsk
+import no.nav.tsm.utils.digitalSykmelding
+import no.nav.tsm.utils.utenlandskSykmelding
+import no.nav.tsm.utils.xmlSykmelding
 import org.junit.Test
 
 class BigQuerySykmeldingerTest : BigQueryTestContainer() {
@@ -12,7 +13,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     @Test
     fun `verify nullability on a basic insert`() {
         // Insert one sykmelding
-        val sykmelding = testSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
+        val sykmelding = digitalSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
             .addRow(sykmelding.sykmelding.id, sykmelding.toNasjonalBqPayload().toContent())
             .build()
@@ -51,7 +52,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     @Test
     fun `verify nullability on a utenlandsk insert`() {
         // Insert one sykmelding
-        val sykmelding: SykmeldingRecord.Utenlandsk = testUtenlandsk("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
+        val sykmelding: SykmeldingRecord.Utenlandsk = utenlandskSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_UTENLANDSK_TABLE)
             .addRow(sykmelding.sykmelding.id, sykmelding.toUtenlandskBqPayload().toContent())
             .build()
@@ -81,7 +82,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     @Test
     fun `verify schema (digital) against BQ types`() {
         val schema = getSchema(SYKMELDINGER_TABLE)
-        val mapped = testSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6").toNasjonalBqPayload()
+        val mapped = digitalSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6").toNasjonalBqPayload()
 
         val expectedMissingInDigital = listOf("meta_regelsett_versjon", "syketilfellet_start_dato")
         schema.fields.forEach {
@@ -109,9 +110,33 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     }
 
     @Test
+    fun `verify schema (xml) against BQ types`() {
+        val schema = getSchema(SYKMELDINGER_TABLE)
+        val mapped = xmlSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6").toNasjonalBqPayload()
+
+        schema.fields.forEach {
+            val actual = requireNotNull(mapped.get(it.name)) {
+                "Field ${it.name} (${it.type}, ${it.mode}) is in the schema but not in the mapped payload"
+            }
+
+            when (it.mode) {
+                Field.Mode.NULLABLE -> {
+                    require(actual.bqProps.nullable) { "Field ${it.name} is nullable in the schema but not in the mapped payload" }
+                }
+
+                Field.Mode.REPEATED -> {
+                    require(actual.bqProps.repeated) { "Field ${it.name} is repeated in the schema but not in the mapped payload" }
+                }
+
+                else -> {}
+            }
+        }
+    }
+
+    @Test
     fun `verify schema (utenlansk) against BQ types`() {
         val schema = getSchema(SYKMELDINGER_UTENLANDSK_TABLE)
-        val mapped = testUtenlandsk("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6").toUtenlandskBqPayload()
+        val mapped = utenlandskSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6").toUtenlandskBqPayload()
 
         schema.fields.forEach {
             val actual = requireNotNull(mapped.get(it.name)) {

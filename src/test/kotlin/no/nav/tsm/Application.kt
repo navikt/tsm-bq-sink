@@ -17,7 +17,7 @@ import no.nav.tsm.core.bq.migrations.nasjonalSykmeldingSchema
 import no.nav.tsm.core.bq.toNasjonalBqPayload
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureMonitoring
-import no.nav.tsm.utils.testSykmelding
+import no.nav.tsm.utils.digitalSykmelding
 import org.junit.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -66,7 +66,7 @@ class Application {
             bigQuery.create(TableInfo.newBuilder(testTable, ntd).build())
         }
 
-        val testSykmelding = testSykmelding("335866e1-19d9-4bff-ba24-fb764214fa9c")
+        val testSykmelding = digitalSykmelding("335866e1-19d9-4bff-ba24-fb764214fa9c")
         val res = bigQuery.insertAll(
             InsertAllRequest
                 .newBuilder(testTable)
