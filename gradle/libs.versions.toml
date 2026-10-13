@@ -1,6 +1,6 @@
 [versions]
-kotlin = "2.4.0"
-logback = "1.6.1"
+kotlin = "2.4.20"
+logback = "1.6.5"
 logbackEncoder = "9.0"
 bigquery = "2.73.0"
 
