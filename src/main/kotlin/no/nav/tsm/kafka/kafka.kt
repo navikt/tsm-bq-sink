@@ -1,5 +1,6 @@
 package no.nav.tsm.kafka
 
+import com.google.cloud.bigquery.BigQueryException
 import io.ktor.server.application.*
 import io.ktor.server.plugins.di.*
 import no.nav.tsm.core.Environment
@@ -22,10 +23,13 @@ fun Application.configureKafka() {
             name = "tsm.sykmeldinger",
             onRecord = { record, meta -> service.insertRecordIntoBigQuery(record, meta) },
             onTombstone = { service.deleteRecordFromBigQuery(it.key) },
-            shouldSkip = {
+            shouldSkip = { meta, ex ->
+                // Never skip BigQueryExceptions, this is something we have messed up, will be logged in lib
+                if (ex is BigQueryException) return@consume false
+
                 when (env.runtime.env) {
                     RuntimeCluster.DEV -> {
-                        logger.warn("Skipping record with key ${it.key} because we are in DEV environment")
+                        logger.warn("Skipping record with key ${meta.key} because we are in DEV environment")
                         true
                     }
                     else -> false
