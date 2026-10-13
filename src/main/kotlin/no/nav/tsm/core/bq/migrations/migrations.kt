@@ -21,7 +21,6 @@ fun ensureMigrationsTable(bigQuery: BigQuery) {
     if (table == null) createMigrationsTable(bigQuery)
 }
 
-
 fun applyMigrations(bigQuery: BigQuery) {
     val currentSchemaVersion = bigQuery.getCurrentSchemaVersion()
     logger.info("Current schema version: $currentSchemaVersion")
