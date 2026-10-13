@@ -1,7 +1,7 @@
-package no.nav.tsm.core.bq.migrations
+package no.nav.tsm.bq.migrations
 
 import com.google.cloud.bigquery.*
-import no.nav.tsm.core.bq.*
+import no.nav.tsm.bq.*
 import no.nav.tsm.ktor.logger
 
 private val logger = logger()

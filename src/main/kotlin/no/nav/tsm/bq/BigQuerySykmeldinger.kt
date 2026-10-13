@@ -1,4 +1,4 @@
-package no.nav.tsm.core.bq
+package no.nav.tsm.bq
 
 import com.google.cloud.bigquery.TableId
 import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering

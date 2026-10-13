@@ -1,11 +1,11 @@
-package no.nav.tsm.core.bq
+package no.nav.tsm.bq
 
 import com.google.cloud.bigquery.BigQueryOptions
 import com.google.cloud.bigquery.Field
 import com.google.cloud.bigquery.StandardSQLTypeName
+import no.nav.tsm.bq.migrations.applyMigrations
+import no.nav.tsm.bq.migrations.ensureMigrationsTable
 import no.nav.tsm.core.GcpConfig
-import no.nav.tsm.core.bq.migrations.applyMigrations
-import no.nav.tsm.core.bq.migrations.ensureMigrationsTable
 
 const val DATASET_ID = "tsm_kafka_sink"
 

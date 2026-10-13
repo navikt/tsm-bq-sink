@@ -1,4 +1,4 @@
-package no.nav.tsm.core.bq
+package no.nav.tsm.bq
 
 import org.junit.Test
 

@@ -1,31 +1,8 @@
 package no.nav.tsm.utils
 
-import no.nav.tsm.sykmelding.input.core.model.Aktivitet
-import no.nav.tsm.sykmelding.input.core.model.ArbeidsgiverInfo
-import no.nav.tsm.sykmelding.input.core.model.AvsenderSystem
-import no.nav.tsm.sykmelding.input.core.model.Behandler
-import no.nav.tsm.sykmelding.input.core.model.DiagnoseInfo
-import no.nav.tsm.sykmelding.input.core.model.DiagnoseSystem
-import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
+import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.Pasient
-import no.nav.tsm.sykmelding.input.core.model.RuleType
-import no.nav.tsm.sykmelding.input.core.model.Sykmelder
-import no.nav.tsm.sykmelding.input.core.model.Sykmelding
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingMeta
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
-import no.nav.tsm.sykmelding.input.core.model.UtenlandskInfo
-import no.nav.tsm.sykmelding.input.core.model.ValidationResult
-import no.nav.tsm.sykmelding.input.core.model.metadata.HelsepersonellKategori
-import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
-import no.nav.tsm.sykmelding.input.core.model.metadata.MessageInfo
-import no.nav.tsm.sykmelding.input.core.model.metadata.Meldingstype
-import no.nav.tsm.sykmelding.input.core.model.metadata.Navn
-import no.nav.tsm.sykmelding.input.core.model.metadata.OrgId
-import no.nav.tsm.sykmelding.input.core.model.metadata.OrgIdType
-import no.nav.tsm.sykmelding.input.core.model.metadata.Organisasjon
-import no.nav.tsm.sykmelding.input.core.model.metadata.OrganisasjonsType
-import no.nav.tsm.sykmelding.input.core.model.metadata.PersonId
-import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
+import no.nav.tsm.sykmelding.input.core.model.metadata.*
 import java.time.OffsetDateTime
 
 fun digitalSykmelding(id: String): SykmeldingRecord = SykmeldingRecord.Digital(

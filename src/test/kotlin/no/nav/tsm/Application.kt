@@ -1,20 +1,13 @@
 package no.nav.tsm
 
-import com.google.cloud.bigquery.BigQueryOptions
-import com.google.cloud.bigquery.InsertAllRequest
-import com.google.cloud.bigquery.PrimaryKey
-import com.google.cloud.bigquery.StandardTableDefinition
-import com.google.cloud.bigquery.TableConstraints
-import com.google.cloud.bigquery.TableId
-import com.google.cloud.bigquery.TableInfo
-import com.google.cloud.bigquery.TimePartitioning
+import com.google.cloud.bigquery.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.config.*
 import io.ktor.server.testing.*
-import no.nav.tsm.core.bq.SYKMELDINGER_TABLE
-import no.nav.tsm.core.bq.migrations.nasjonalSykmeldingSchema
-import no.nav.tsm.core.bq.toNasjonalBqPayload
+import no.nav.tsm.bq.SYKMELDINGER_TABLE
+import no.nav.tsm.bq.migrations.nasjonalSykmeldingSchema
+import no.nav.tsm.bq.toNasjonalBqPayload
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureMonitoring
 import no.nav.tsm.utils.digitalSykmelding

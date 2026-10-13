@@ -1,7 +1,8 @@
-package no.nav.tsm.core.bq
+package no.nav.tsm.bq
 
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingModule
 import tools.jackson.module.kotlin.jacksonMapperBuilder
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -57,8 +58,8 @@ sealed interface BqTypes {
         override fun toBq(): Any = value.formatBqDateTime()
     }
 
-    class Date(val value: java.time.LocalDate) : BqTypes {
-        class Nullable(val value: java.time.LocalDate?) : BqTypes {
+    class Date(val value: LocalDate) : BqTypes {
+        class Nullable(val value: LocalDate?) : BqTypes {
             override val bqProps = BqProperties("DATE", nullable = true, repeated = false)
 
             override fun toBq(): Any? = value?.toString()

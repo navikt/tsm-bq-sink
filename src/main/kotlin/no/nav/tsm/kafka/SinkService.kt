@@ -2,8 +2,8 @@ package no.nav.tsm.kafka
 
 import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.InsertAllRequest
+import no.nav.tsm.bq.*
 import no.nav.tsm.core.Environment
-import no.nav.tsm.core.bq.*
 import no.nav.tsm.ktor.kafka.consumer.RecordMeta
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 

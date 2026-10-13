@@ -1,7 +1,8 @@
-package no.nav.tsm.core.bq
+package no.nav.tsm.bq
 
 import no.nav.tsm.sykmelding.input.core.model.*
 import org.junit.Test
+import java.time.LocalDate
 import java.time.OffsetDateTime
 import kotlin.test.assertEquals
 
@@ -14,19 +15,19 @@ class BigQueryTypesTest {
             "nullableStringField" to BqTypes.String.Nullable(null),
             // Example with GMT+2 and lotsa sub-second precision, which should be truncated to seconds and converted to UTC
             "dateTimeField" to BqTypes.DateTime(OffsetDateTime.parse("2024-06-01T14:34:56.123456789+02:00")),
-            "dateField" to BqTypes.Date(java.time.LocalDate.parse("2024-06-01")),
+            "dateField" to BqTypes.Date(LocalDate.parse("2024-06-01")),
             "nullableDateField" to BqTypes.Date.Nullable(null),
             "jsonArray" to BqTypes.JsonArray(
                 listOf(
                     Aktivitet.Gradert(
-                        fom = java.time.LocalDate.parse("2024-06-01"),
-                        tom = java.time.LocalDate.parse("2024-06-15"),
+                        fom = LocalDate.parse("2024-06-01"),
+                        tom = LocalDate.parse("2024-06-15"),
                         grad = 50,
                         reisetilskudd = false
                     ),
                     Aktivitet.IkkeMulig(
-                        fom = java.time.LocalDate.parse("2024-06-16"),
-                        tom = java.time.LocalDate.parse("2024-06-30"),
+                        fom = LocalDate.parse("2024-06-16"),
+                        tom = LocalDate.parse("2024-06-30"),
                         medisinskArsak = MedisinskArsak(
                             beskrivelse = "Test description",
                             arsak = listOf(MedisinskArsakType.AKTIVITET_FORHINDRER_BEDRING)

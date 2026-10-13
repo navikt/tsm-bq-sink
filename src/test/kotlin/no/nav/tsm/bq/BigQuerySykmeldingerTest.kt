@@ -1,4 +1,4 @@
-package no.nav.tsm.core.bq
+package no.nav.tsm.bq
 
 import com.google.cloud.bigquery.*
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
@@ -28,9 +28,9 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
             ).values.firstOrNull()
         ) { "Inserted row not found in BigQuery" }
 
-        val table = requireNotNull(bigQuery.getTable(SYKMELDINGER_TABLE)) { "Table $SYKMELDINGER_TABLE does not exist" }
+        val table = requireNotNull(bigQuery.getTable(SYKMELDINGER_TABLE)) { "Table ${SYKMELDINGER_TABLE} does not exist" }
         val schema =
-            requireNotNull(table.getDefinition<StandardTableDefinition>().schema) { "Table $SYKMELDINGER_TABLE has no schema" }
+            requireNotNull(table.getDefinition<StandardTableDefinition>().schema) { "Table ${SYKMELDINGER_TABLE} has no schema" }
 
         schema.fields.forEach { field ->
             println("${field.name} ${field.type} (${field.mode}) = ${row.get(field.name).value}")
@@ -68,9 +68,9 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
         ) { "Inserted row not found in BigQuery" }
 
         val table =
-            requireNotNull(bigQuery.getTable(SYKMELDINGER_UTENLANDSK_TABLE)) { "Table $SYKMELDINGER_UTENLANDSK_TABLE does not exist" }
+            requireNotNull(bigQuery.getTable(SYKMELDINGER_UTENLANDSK_TABLE)) { "Table ${SYKMELDINGER_UTENLANDSK_TABLE} does not exist" }
         val schema =
-            requireNotNull(table.getDefinition<StandardTableDefinition>().schema) { "Table $SYKMELDINGER_UTENLANDSK_TABLE has no schema" }
+            requireNotNull(table.getDefinition<StandardTableDefinition>().schema) { "Table ${SYKMELDINGER_UTENLANDSK_TABLE} has no schema" }
 
         schema.fields.forEach { field ->
             if (field.mode == Field.Mode.REQUIRED) {
