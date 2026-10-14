@@ -1,16 +1,10 @@
 package no.nav.tsm.sykmelding
 
-import com.google.cloud.bigquery.StandardSQLTypeName
 import com.google.cloud.bigquery.TableId
 import no.nav.tsm.bq.BqPayload
 import no.nav.tsm.bq.BqTypes
 import no.nav.tsm.bq.DATASET_ID
-import no.nav.tsm.bq.nullableField
-import no.nav.tsm.sykmelding.input.core.model.Aktivitet
-import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
-import no.nav.tsm.sykmelding.input.core.model.Sykmelding
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingMeta
-import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
+import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
 import no.nav.tsm.sykmelding.input.core.model.metadata.OrgIdType
 import no.nav.tsm.sykmelding.input.core.model.metadata.PersonIdType
@@ -31,7 +25,7 @@ class SykmeldingBqMappersService(
             "tom" to BqTypes.Date(sykmelding.aktivitet.maxOf { aktivitet -> aktivitet.tom }),
             "type" to BqTypes.String(sykmelding.type.name),
             "regelutfall" to BqTypes.String(validation.status.name),
-            "aktivitet" to BqTypes.RecordArray(sykmelding.aktivitet.map { aktivitetToBqPayload(it) }),
+            "perioder" to BqTypes.RecordArray(sykmelding.aktivitet.map { periodeToBqPayload(it) }),
             "meta_generert_dato" to BqTypes.DateTime(sykmelding.metadata.genDate),
             "meta_nav_mottatt_dato" to BqTypes.DateTime(sykmelding.metadata.mottattDato),
             "meta_avsender_system" to BqTypes.String(sykmelding.metadata.avsenderSystem.navn),
@@ -116,7 +110,7 @@ class SykmeldingBqMappersService(
         return payload
     }
 
-    private fun aktivitetToBqPayload(aktivitet: Aktivitet): BqPayload {
+    private fun periodeToBqPayload(aktivitet: Aktivitet): BqPayload {
         val payload = BqPayload(
             "type" to BqTypes.Enum(aktivitet.type),
             "fom" to BqTypes.Date(aktivitet.fom),

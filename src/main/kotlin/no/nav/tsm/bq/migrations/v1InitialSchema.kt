@@ -37,7 +37,7 @@ val baseSchema = listOf(
     nullableField("syketilfellet_start_dato", StandardSQLTypeName.STRING),
     // Aktivitet
     arrayRecord(
-        "aktivitet",
+        "perioder",
         nonNullableField("type", StandardSQLTypeName.STRING),
         nonNullableField("fom", StandardSQLTypeName.DATE),
         nonNullableField("tom", StandardSQLTypeName.DATE),
@@ -78,12 +78,19 @@ val utenlandskSykmeldingSchema = Schema.of(
  *
  * Pretend this is a flyway migration.
  */
-fun v1InitialSchema(bigQuery: BigQuery) {
+fun v1InitialSchema(bq: BigQuery) {
     logger.info("Migrating to schema version 1")
 
+    createSykmeldingerTable(bq)
+
+    bq.insertSchemaVersion(1)
+}
+
+private fun createSykmeldingerTable(bigQuery: BigQuery) {
     val tableConstraint = TableConstraints.newBuilder().setPrimaryKey(
         PrimaryKey.newBuilder().setColumns(listOf("id")).build()
     ).build()
+
     val timePartitioning = TimePartitioning
         .newBuilder(TimePartitioning.Type.MONTH)
         .setField("meta_generert_dato")
@@ -103,5 +110,4 @@ fun v1InitialSchema(bigQuery: BigQuery) {
 
     bigQuery.create(TableInfo.newBuilder(SYKMELDINGER_TABLE, nasjonalTableDefinition).build())
     bigQuery.create(TableInfo.newBuilder(SYKMELDINGER_UTENLANDSK_TABLE, utenlandskTableDefinition).build())
-    bigQuery.insertSchemaVersion(1)
 }

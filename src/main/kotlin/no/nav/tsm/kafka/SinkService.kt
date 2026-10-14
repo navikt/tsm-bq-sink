@@ -22,22 +22,19 @@ class SinkService(
                 .addRow(meta.key, sykmeldingBqMappersService.toUtenlandskBqPayload(record).toContent())
                 .build()
         } else {
-             InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
+            InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
                 .addRow(meta.key, sykmeldingBqMappersService.toNasjonalBqPayload(record).toContent())
                 .build()
         }
 
-        val response = bq.insertAll(request)
-        check(!response.hasErrors()) {
-            "BigQuery rejected the record: ${response.insertErrors}"
+        val sykmeldingResponse = bq.insertAll(request)
+        check(!sykmeldingResponse.hasErrors()) {
+            "BigQuery rejected the record: ${sykmeldingResponse.insertErrors}"
         }
     }
 
-    /**
-     * TODO:
-     */
+
     fun deleteRecordFromBigQuery(key: String) {
-        // doit
+
     }
 }
-

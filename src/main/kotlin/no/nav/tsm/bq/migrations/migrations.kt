@@ -14,6 +14,8 @@ fun BigQuery.insertSchemaVersion(version: Long) {
             .addRow(mapOf("schema_version" to version, "last_updated" to System.currentTimeMillis() / 1000.0))
             .build()
     )
+
+    logger.info("Set version of migrations to $version!")
 }
 
 fun ensureMigrationsTable(bigQuery: BigQuery) {
