@@ -53,4 +53,3 @@ private fun BigQuery.getCurrentSchemaVersion(): Long {
         ).build()
     ).values.firstOrNull()?.get(0)?.longValue ?: 0L
 }
-

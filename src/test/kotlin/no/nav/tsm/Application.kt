@@ -5,11 +5,15 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.config.*
 import io.ktor.server.testing.*
-import no.nav.tsm.bq.SYKMELDINGER_TABLE
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.tsm.sykmelding.SYKMELDINGER_TABLE
 import no.nav.tsm.bq.migrations.nasjonalSykmeldingSchema
-import no.nav.tsm.bq.toNasjonalBqPayload
+import no.nav.tsm.core.Environment
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureMonitoring
+import no.nav.tsm.sykmelding.HashService
+import no.nav.tsm.sykmelding.SykmeldingBqMappersService
 import no.nav.tsm.utils.digitalSykmelding
 import org.junit.Ignore
 import kotlin.test.Test
@@ -59,13 +63,17 @@ class Application {
             bigQuery.create(TableInfo.newBuilder(testTable, ntd).build())
         }
 
+        val environment = mockk<Environment>(relaxed = true).apply { every { hashSecret } returns "test-secret" }
+        val mappers = SykmeldingBqMappersService(
+            hashService = HashService(environment)
+        )
         val testSykmelding = digitalSykmelding("335866e1-19d9-4bff-ba24-fb764214fa9c")
         val res = bigQuery.insertAll(
             InsertAllRequest
                 .newBuilder(testTable)
                 .addRow(
                     testSykmelding.sykmelding.id,
-                    testSykmelding.toNasjonalBqPayload().toContent()
+                    mappers.toNasjonalBqPayload(testSykmelding).toContent()
                 )
                 .build()
         )

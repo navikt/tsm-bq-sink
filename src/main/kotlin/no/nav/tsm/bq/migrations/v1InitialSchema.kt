@@ -3,6 +3,8 @@ package no.nav.tsm.bq.migrations
 import com.google.cloud.bigquery.*
 import no.nav.tsm.bq.*
 import no.nav.tsm.ktor.logger
+import no.nav.tsm.sykmelding.SYKMELDINGER_TABLE
+import no.nav.tsm.sykmelding.SYKMELDINGER_UTENLANDSK_TABLE
 
 private val logger = logger()
 

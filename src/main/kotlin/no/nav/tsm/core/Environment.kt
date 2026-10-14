@@ -13,6 +13,7 @@ class GcpConfig(
 class Environment(
     val runtime: Runtime,
     val gcp: GcpConfig,
+    val hashSecret: String
 )
 
 fun initializeEnvironment(config: ApplicationConfig): Environment {
@@ -21,6 +22,7 @@ fun initializeEnvironment(config: ApplicationConfig): Environment {
             env = getRuntimeCluster(),
             name = config.property("app.name").getString()
         ),
+        hashSecret = config.property("app.hashSecret").getString(),
         gcp = GcpConfig(
             projectId = config.property("bigquery.projectId").getString()
         )

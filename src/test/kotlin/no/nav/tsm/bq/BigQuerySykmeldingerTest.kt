@@ -1,6 +1,13 @@
 package no.nav.tsm.bq
 
 import com.google.cloud.bigquery.*
+import io.mockk.every
+import io.mockk.mockk
+import no.nav.tsm.core.Environment
+import no.nav.tsm.sykmelding.HashService
+import no.nav.tsm.sykmelding.SYKMELDINGER_TABLE
+import no.nav.tsm.sykmelding.SYKMELDINGER_UTENLANDSK_TABLE
+import no.nav.tsm.sykmelding.SykmeldingBqMappersService
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.utils.BigQueryTestContainer
 import no.nav.tsm.utils.digitalSykmelding
@@ -10,12 +17,18 @@ import org.junit.Test
 
 class BigQuerySykmeldingerTest : BigQueryTestContainer() {
 
+    val environment = mockk<Environment>(relaxed = true).apply { every { hashSecret } returns "test-secret" }
+    val mappers = SykmeldingBqMappersService(
+        hashService = HashService(environment)
+    )
+
+
     @Test
     fun `verify nullability on a basic insert`() {
         // Insert one sykmelding
         val sykmelding = digitalSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
-            .addRow(sykmelding.sykmelding.id, sykmelding.toNasjonalBqPayload().toContent())
+            .addRow(sykmelding.sykmelding.id, mappers.toNasjonalBqPayload(sykmelding).toContent())
             .build()
 
         val response = bigQuery.insertAll(request)
@@ -28,7 +41,8 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
             ).values.firstOrNull()
         ) { "Inserted row not found in BigQuery" }
 
-        val table = requireNotNull(bigQuery.getTable(SYKMELDINGER_TABLE)) { "Table ${SYKMELDINGER_TABLE} does not exist" }
+        val table =
+            requireNotNull(bigQuery.getTable(SYKMELDINGER_TABLE)) { "Table ${SYKMELDINGER_TABLE} does not exist" }
         val schema =
             requireNotNull(table.getDefinition<StandardTableDefinition>().schema) { "Table ${SYKMELDINGER_TABLE} has no schema" }
 
@@ -54,7 +68,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
         // Insert one sykmelding
         val sykmelding: SykmeldingRecord.Utenlandsk = utenlandskSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_UTENLANDSK_TABLE)
-            .addRow(sykmelding.sykmelding.id, sykmelding.toUtenlandskBqPayload().toContent())
+            .addRow(sykmelding.sykmelding.id, mappers.toUtenlandskBqPayload(sykmelding).toContent())
             .build()
 
         val response = bigQuery.insertAll(request)
@@ -82,7 +96,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     @Test
     fun `verify schema (digital) against BQ types`() {
         val schema = getSchema(SYKMELDINGER_TABLE)
-        val mapped = digitalSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6").toNasjonalBqPayload()
+        val mapped = mappers.toNasjonalBqPayload(digitalSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6"))
 
         val expectedMissingInDigital = listOf("meta_regelsett_versjon", "syketilfellet_start_dato")
         schema.fields.forEach {
@@ -112,7 +126,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     @Test
     fun `verify schema (xml) against BQ types`() {
         val schema = getSchema(SYKMELDINGER_TABLE)
-        val mapped = xmlSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6").toNasjonalBqPayload()
+        val mapped = mappers.toNasjonalBqPayload(xmlSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6"))
 
         schema.fields.forEach {
             val actual = requireNotNull(mapped.get(it.name)) {
@@ -136,7 +150,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     @Test
     fun `verify schema (utenlansk) against BQ types`() {
         val schema = getSchema(SYKMELDINGER_UTENLANDSK_TABLE)
-        val mapped = utenlandskSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6").toUtenlandskBqPayload()
+        val mapped = mappers.toUtenlandskBqPayload(utenlandskSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6"))
 
         schema.fields.forEach {
             val actual = requireNotNull(mapped.get(it.name)) {
