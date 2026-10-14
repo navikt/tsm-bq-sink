@@ -21,11 +21,11 @@ class SinkService(
     fun insertRecordIntoBigQuery(record: SykmeldingRecord, meta: RecordMeta) {
         val request = if (record is SykmeldingRecord.Utenlandsk) {
             InsertAllRequest.newBuilder(SYKMELDINGER_UTENLANDSK_TABLE)
-                .addRow(meta.key, sykmeldingBqMappersService.toUtenlandskBqPayload(record).toContent())
+                .addRow(meta.key, sykmeldingBqMappersService.toUtenlandskBqPayload(record, meta).toContent())
                 .build()
         } else {
             InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
-                .addRow(meta.key, sykmeldingBqMappersService.toNasjonalBqPayload(record).toContent())
+                .addRow(meta.key, sykmeldingBqMappersService.toNasjonalBqPayload(record, meta).toContent())
                 .build()
         }
 

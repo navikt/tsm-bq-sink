@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.TableId
 import no.nav.tsm.bq.BqPayload
 import no.nav.tsm.bq.BqTypes
 import no.nav.tsm.bq.DATASET_ID
+import no.nav.tsm.ktor.kafka.consumer.RecordMeta
 import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
 import no.nav.tsm.sykmelding.input.core.model.metadata.OrgIdType
@@ -18,7 +19,7 @@ class SykmeldingBqMappersService(
     /**
      * All common values between utenlandsk and nasjonal.
      */
-    private fun SykmeldingRecord.toCommonBqPayload(): BqPayload {
+    private fun SykmeldingRecord.toCommonBqPayload(meta: RecordMeta): BqPayload {
         val payload = BqPayload(
             "id" to BqTypes.String(sykmelding.id),
             "fom" to BqTypes.Date(sykmelding.aktivitet.minOf { aktivitet -> aktivitet.fom }),
@@ -26,6 +27,9 @@ class SykmeldingBqMappersService(
             "type" to BqTypes.String(sykmelding.type.name),
             "regelutfall" to BqTypes.String(validation.status.name),
             "perioder" to BqTypes.RecordArray(sykmelding.aktivitet.map { periodeToBqPayload(it) }),
+            "kafka_partition" to BqTypes.Long(meta.partition.toLong()),
+            "kafka_offset" to BqTypes.Long(meta.offset),
+            "kafka_epoch" to BqTypes.Long(meta.timestamp),
             "meta_generert_dato" to BqTypes.DateTime(sykmelding.metadata.genDate),
             "meta_nav_mottatt_dato" to BqTypes.DateTime(sykmelding.metadata.mottattDato),
             "meta_avsender_system" to BqTypes.String(sykmelding.metadata.avsenderSystem.navn),
@@ -85,18 +89,17 @@ class SykmeldingBqMappersService(
         return payload
     }
 
-    fun toUtenlandskBqPayload(record: SykmeldingRecord.Utenlandsk): BqPayload = record.toCommonBqPayload()
-        .add(
-            "meta_land" to BqTypes.String(record.sykmelding.utenlandskInfo.land)
-        )
+    fun toUtenlandskBqPayload(record: SykmeldingRecord.Utenlandsk, meta: RecordMeta): BqPayload = record
+        .toCommonBqPayload(meta)
+        .add("meta_land" to BqTypes.String(record.sykmelding.utenlandskInfo.land))
 
-    fun toNasjonalBqPayload(record: SykmeldingRecord): BqPayload {
+    fun toNasjonalBqPayload(record: SykmeldingRecord, meta: RecordMeta): BqPayload {
         val sykmelding = record.sykmelding
         if (sykmelding !is Sykmelding.Nasjonal) {
             throw IllegalArgumentException("Cannot convert Utenlandsk sykmelding to Nasjonal row, use toUtenlandskBqPayload() instead")
         }
 
-        val payload = record.toCommonBqPayload().add(
+        val payload = record.toCommonBqPayload(meta).add(
             "behandler_hpr_nr" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HPR }?.id?.trim()),
             "behandler_her_id" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HER }?.id?.trim()),
             "behandler_ident_sha256" to BqTypes.String.Nullable(
@@ -135,13 +138,13 @@ class SykmeldingBqMappersService(
 
             is Aktivitet.Behandlingsdager -> {
                 payload.add(
-                    "enkeltstaende_behandlingsdager" to BqTypes.Int.Nullable(aktivitet.antallBehandlingsdager)
+                    "enkeltstaende_behandlingsdager" to BqTypes.Long.Nullable(aktivitet.antallBehandlingsdager.toLong())
                 )
             }
 
             is Aktivitet.Gradert -> {
                 payload.add(
-                    "grad" to BqTypes.Int(aktivitet.grad),
+                    "grad" to BqTypes.Long(aktivitet.grad.toLong()),
                     "gradert_reisetilskudd" to BqTypes.Boolean(aktivitet.reisetilskudd)
                 )
             }

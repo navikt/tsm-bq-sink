@@ -4,6 +4,7 @@ import com.google.cloud.bigquery.*
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.tsm.core.Environment
+import no.nav.tsm.ktor.kafka.consumer.RecordMeta
 import no.nav.tsm.sykmelding.HashService
 import no.nav.tsm.sykmelding.SYKMELDINGER_TABLE
 import no.nav.tsm.sykmelding.SYKMELDINGER_UTENLANDSK_TABLE
@@ -23,8 +24,9 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     @Test
     fun `verify nullability on a basic insert`() {
         val sykmelding = digitalSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
+        val meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
-            .addRow(sykmelding.sykmelding.id, mappers.toNasjonalBqPayload(sykmelding).toContent())
+            .addRow(sykmelding.sykmelding.id, mappers.toNasjonalBqPayload(sykmelding, meta).toContent())
             .build()
 
         val response = bigQuery.insertAll(request)
@@ -63,8 +65,9 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     fun `verify nullability on a utenlandsk insert`() {
         // Insert one sykmelding
         val sykmelding: SykmeldingRecord.Utenlandsk = utenlandskSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
+        val meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_UTENLANDSK_TABLE)
-            .addRow(sykmelding.sykmelding.id, mappers.toUtenlandskBqPayload(sykmelding).toContent())
+            .addRow(sykmelding.sykmelding.id, mappers.toUtenlandskBqPayload(sykmelding, meta).toContent())
             .build()
 
         val response = bigQuery.insertAll(request)
@@ -92,7 +95,9 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     @Test
     fun `verify schema (digital) against BQ types`() {
         val schema = getSchema(SYKMELDINGER_TABLE)
-        val mapped = mappers.toNasjonalBqPayload(digitalSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6"))
+        val sykmelding = digitalSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
+        val meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
+        val mapped = mappers.toNasjonalBqPayload(sykmelding, meta)
 
         val expectedMissingInDigital = listOf("meta_regelsett_versjon", "syketilfellet_start_dato")
         schema.fields.forEach {
@@ -122,7 +127,9 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     @Test
     fun `verify schema (xml) against BQ types`() {
         val schema = getSchema(SYKMELDINGER_TABLE)
-        val mapped = mappers.toNasjonalBqPayload(xmlSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6"))
+        val sykmelding = xmlSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
+        val meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
+        val mapped = mappers.toNasjonalBqPayload(sykmelding, meta)
 
         schema.fields.forEach {
             val actual = requireNotNull(mapped.get(it.name)) {
@@ -146,7 +153,9 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
     @Test
     fun `verify schema (utenlansk) against BQ types`() {
         val schema = getSchema(SYKMELDINGER_UTENLANDSK_TABLE)
-        val mapped = mappers.toUtenlandskBqPayload(utenlandskSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6"))
+        val sykmelding = utenlandskSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
+        val meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
+        val mapped = mappers.toUtenlandskBqPayload(sykmelding, meta)
 
         schema.fields.forEach {
             val actual = requireNotNull(mapped.get(it.name)) {

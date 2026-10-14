@@ -10,6 +10,7 @@ import io.mockk.mockk
 import no.nav.tsm.sykmelding.SYKMELDINGER_TABLE
 import no.nav.tsm.bq.migrations.nasjonalSykmeldingSchema
 import no.nav.tsm.core.Environment
+import no.nav.tsm.ktor.kafka.consumer.RecordMeta
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureMonitoring
 import no.nav.tsm.sykmelding.HashService
@@ -73,7 +74,9 @@ class Application {
                 .newBuilder(testTable)
                 .addRow(
                     testSykmelding.sykmelding.id,
-                    mappers.toNasjonalBqPayload(testSykmelding).toContent()
+                    mappers.toNasjonalBqPayload(testSykmelding, RecordMeta(
+                        testSykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true)
+                    )).toContent()
                 )
                 .build()
         )

@@ -14,6 +14,10 @@ val baseSchema = listOf(
     nonNullableField("tom", StandardSQLTypeName.DATE),
     nonNullableField("type", StandardSQLTypeName.STRING),
     nonNullableField("regelutfall", StandardSQLTypeName.STRING),
+    // Kafka metadata used for de-duplication and ordering
+    nonNullableField("kafka_partition", StandardSQLTypeName.INT64),
+    nonNullableField("kafka_offset", StandardSQLTypeName.INT64),
+    nonNullableField("kafka_epoch", StandardSQLTypeName.INT64),
     // Metadata
     nonNullableField("meta_generert_dato", StandardSQLTypeName.DATETIME),
     nonNullableField("meta_nav_mottatt_dato", StandardSQLTypeName.DATETIME),
