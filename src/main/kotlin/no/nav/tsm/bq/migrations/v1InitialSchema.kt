@@ -36,7 +36,20 @@ val baseSchema = listOf(
     nullableField("yrkesskadedato", StandardSQLTypeName.DATE),
     nullableField("syketilfellet_start_dato", StandardSQLTypeName.STRING),
     // Aktivitet
-    arrayOf("aktivitet", StandardSQLTypeName.JSON),
+    arrayRecord(
+        "aktivitet",
+        nonNullableField("type", StandardSQLTypeName.STRING),
+        nonNullableField("fom", StandardSQLTypeName.DATE),
+        nonNullableField("tom", StandardSQLTypeName.DATE),
+        nullableField("medisinsk_arsak_beskrivelse", StandardSQLTypeName.STRING),
+        nullableField("medisinsk_arsak_arsak", StandardSQLTypeName.STRING),
+        nullableField("arbeidsrelatert_arsak", StandardSQLTypeName.STRING),
+        nullableField("arbeidsrelatert_arsak_beskrivelse", StandardSQLTypeName.STRING),
+        nullableField("enkeltstaende_behandlingsdager", StandardSQLTypeName.INT64),
+        nullableField("grad", StandardSQLTypeName.INT64),
+        nullableField("gradert_reisetilskudd", StandardSQLTypeName.BOOL),
+        nullableField("avventene_innspill_til_arbeidsgiver", StandardSQLTypeName.STRING),
+    ),
 )
 
 val nasjonalSykmeldingSchema = Schema.of(

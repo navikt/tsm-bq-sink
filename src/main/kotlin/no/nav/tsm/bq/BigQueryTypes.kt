@@ -31,6 +31,18 @@ sealed interface BqTypes {
         override fun toBq(): Any = value
     }
 
+    class Int(val value: kotlin.Int) : BqTypes {
+        override val bqProps = BqProperties("INT64", nullable = false, repeated = false)
+
+        class Nullable(val value: kotlin.Int?) : BqTypes {
+            override val bqProps = BqProperties("INT64", nullable = true, repeated = false)
+
+            override fun toBq(): Any? = value
+        }
+
+        override fun toBq(): Any = value
+    }
+
     class Boolean(val value: kotlin.Boolean) : BqTypes {
         override val bqProps = BqProperties("BOOLEAN", nullable = false, repeated = false)
 

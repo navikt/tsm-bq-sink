@@ -18,14 +18,10 @@ import org.junit.Test
 class BigQuerySykmeldingerTest : BigQueryTestContainer() {
 
     val environment = mockk<Environment>(relaxed = true).apply { every { hashSecret } returns "test-secret" }
-    val mappers = SykmeldingBqMappersService(
-        hashService = HashService(environment)
-    )
-
+    val mappers = SykmeldingBqMappersService(hashService = HashService(environment))
 
     @Test
     fun `verify nullability on a basic insert`() {
-        // Insert one sykmelding
         val sykmelding = digitalSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
             .addRow(sykmelding.sykmelding.id, mappers.toNasjonalBqPayload(sykmelding).toContent())

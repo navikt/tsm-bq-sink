@@ -1,9 +1,12 @@
 package no.nav.tsm.sykmelding
 
+import com.google.cloud.bigquery.StandardSQLTypeName
 import com.google.cloud.bigquery.TableId
 import no.nav.tsm.bq.BqPayload
 import no.nav.tsm.bq.BqTypes
 import no.nav.tsm.bq.DATASET_ID
+import no.nav.tsm.bq.nullableField
+import no.nav.tsm.sykmelding.input.core.model.Aktivitet
 import no.nav.tsm.sykmelding.input.core.model.MedisinskVurdering
 import no.nav.tsm.sykmelding.input.core.model.Sykmelding
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingMeta
@@ -28,7 +31,7 @@ class SykmeldingBqMappersService(
             "tom" to BqTypes.Date(sykmelding.aktivitet.maxOf { aktivitet -> aktivitet.tom }),
             "type" to BqTypes.String(sykmelding.type.name),
             "regelutfall" to BqTypes.String(validation.status.name),
-            "aktivitet" to BqTypes.JsonArray(sykmelding.aktivitet),
+            "aktivitet" to BqTypes.RecordArray(sykmelding.aktivitet.map { aktivitetToBqPayload(it) }),
             "meta_generert_dato" to BqTypes.DateTime(sykmelding.metadata.genDate),
             "meta_nav_mottatt_dato" to BqTypes.DateTime(sykmelding.metadata.mottattDato),
             "meta_avsender_system" to BqTypes.String(sykmelding.metadata.avsenderSystem.navn),
@@ -109,6 +112,48 @@ class SykmeldingBqMappersService(
             ),
             "behandler_hpr_kategori" to BqTypes.Enum(sykmelding.sykmelder.helsepersonellKategori),
         )
+
+        return payload
+    }
+
+    private fun aktivitetToBqPayload(aktivitet: Aktivitet): BqPayload {
+        val payload = BqPayload(
+            "type" to BqTypes.Enum(aktivitet.type),
+            "fom" to BqTypes.Date(aktivitet.fom),
+            "tom" to BqTypes.Date(aktivitet.tom),
+        )
+
+        when (aktivitet) {
+            is Aktivitet.IkkeMulig -> {
+                payload.add(
+                    "medisinsk_arsak_arsak" to BqTypes.Enum.Nullable(aktivitet.medisinskArsak?.arsak?.firstOrNull()),
+                    "medisinsk_arsak_beskrivelse" to BqTypes.String.Nullable(aktivitet.medisinskArsak?.beskrivelse),
+                    "arbeidsrelatert_arsak" to BqTypes.Enum.Nullable(aktivitet.arbeidsrelatertArsak?.arsak?.firstOrNull()),
+                    "arbeidsrelatert_arsak_beskrivelse" to BqTypes.String.Nullable(aktivitet.arbeidsrelatertArsak?.beskrivelse)
+                )
+            }
+
+            is Aktivitet.Avventende -> {
+                payload.add(
+                    "avventene_innspill_til_arbeidsgiver" to BqTypes.String.Nullable(aktivitet.innspillTilArbeidsgiver)
+                )
+            }
+
+            is Aktivitet.Behandlingsdager -> {
+                payload.add(
+                    "enkeltstaende_behandlingsdager" to BqTypes.Int.Nullable(aktivitet.antallBehandlingsdager)
+                )
+            }
+
+            is Aktivitet.Gradert -> {
+                payload.add(
+                    "grad" to BqTypes.Int(aktivitet.grad),
+                    "gradert_reisetilskudd" to BqTypes.Boolean(aktivitet.reisetilskudd)
+                )
+            }
+
+            is Aktivitet.Reisetilskudd -> {}
+        }
 
         return payload
     }
