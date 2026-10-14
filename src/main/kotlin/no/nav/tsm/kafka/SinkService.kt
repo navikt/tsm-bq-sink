@@ -2,6 +2,8 @@ package no.nav.tsm.kafka
 
 import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.InsertAllRequest
+import com.google.cloud.bigquery.QueryJobConfiguration
+import com.google.cloud.bigquery.QueryParameterValue
 import no.nav.tsm.bq.*
 import no.nav.tsm.core.Environment
 import no.nav.tsm.ktor.kafka.consumer.RecordMeta
@@ -33,8 +35,16 @@ class SinkService(
         }
     }
 
-
     fun deleteRecordFromBigQuery(key: String) {
-
+        listOf(SYKMELDINGER_TABLE, SYKMELDINGER_UTENLANDSK_TABLE).forEach { table ->
+            bq.query(
+                QueryJobConfiguration.newBuilder(
+                    "DELETE FROM `${table.dataset}.${table.table}` WHERE id = @id"
+                )
+                    .setUseLegacySql(false)
+                    .addNamedParameter("id", QueryParameterValue.string(key))
+                    .build()
+            )
+        }
     }
 }
