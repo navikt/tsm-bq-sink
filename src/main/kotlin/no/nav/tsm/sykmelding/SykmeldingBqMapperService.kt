@@ -1,9 +1,11 @@
 package no.nav.tsm.sykmelding
 
+import com.google.cloud.bigquery.StandardSQLTypeName
 import com.google.cloud.bigquery.TableId
 import no.nav.tsm.bq.BqPayload
 import no.nav.tsm.bq.BqTypes
 import no.nav.tsm.bq.DATASET_ID
+import no.nav.tsm.bq.nullableField
 import no.nav.tsm.ktor.kafka.consumer.RecordMeta
 import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
@@ -118,6 +120,12 @@ class SykmeldingBqMappersService(
                     hashService.hashIdent(it.trim())
                 }
             ),
+            // Bistand nav
+            "bistand_nav_umiddelbart" to BqTypes.Boolean.Nullable(sykmelding.bistandNav?.bistandUmiddelbart),
+            "bistand_nav_beskrivelse" to BqTypes.String.Nullable(sykmelding.bistandNav?.beskrivBistand),
+            // Tilbakedatering
+            "tilbakedatering_kontaktdato" to BqTypes.Date.Nullable(sykmelding.tilbakedatering?.kontaktDato),
+            "tilbakedatering_begrunnelse" to BqTypes.String.Nullable(sykmelding.tilbakedatering?.begrunnelse),
             // Arbeidsgiver
             "arbeidsgiver_antall_type" to BqTypes.Enum(sykmelding.arbeidsgiver.type),
         )

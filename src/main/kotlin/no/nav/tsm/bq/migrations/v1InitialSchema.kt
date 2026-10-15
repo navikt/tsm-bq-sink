@@ -77,6 +77,12 @@ val nasjonalSykmeldingSchema = Schema.of(
         nullableField("arbeidsgiver_navn", StandardSQLTypeName.STRING),
         nullableField("arbeidsgiver_melding_til_arbeidsgiver", StandardSQLTypeName.STRING),
         nullableField("arbeidsgiver_tiltak_arbeidsplassen", StandardSQLTypeName.STRING),
+        // Bistand nav
+        nullableField("bistand_nav_umiddelbart", StandardSQLTypeName.BOOL),
+        nullableField("bistand_nav_beskrivelse", StandardSQLTypeName.STRING),
+        // Tilbakedatering
+        nullableField("tilbakedatering_kontaktdato", StandardSQLTypeName.DATE),
+        nullableField("tilbakedatering_begrunnelse", StandardSQLTypeName.STRING)
     )
 )
 
