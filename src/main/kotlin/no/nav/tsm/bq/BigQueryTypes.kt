@@ -32,10 +32,10 @@ sealed interface BqTypes {
     }
 
     class Long(val value: kotlin.Long) : BqTypes {
-        override val bqProps = BqProperties("INT64", nullable = false, repeated = false)
+        override val bqProps = BqProperties("INTEGER", nullable = false, repeated = false)
 
         class Nullable(val value: kotlin.Long?) : BqTypes {
-            override val bqProps = BqProperties("INT64", nullable = true, repeated = false)
+            override val bqProps = BqProperties("INTEGER", nullable = true, repeated = false)
 
             override fun toBq(): Any? = value
         }
@@ -107,10 +107,10 @@ sealed interface BqTypes {
     }
 
     class RecordArray(val value: List<BqPayload>) : BqTypes {
-        override val bqProps = BqProperties("STRUCT", nullable = false, repeated = true)
+        override val bqProps = BqProperties("RECORD", nullable = false, repeated = true)
 
         class Nullable(val value: List<BqPayload>?) : BqTypes {
-            override val bqProps = BqProperties("STRUCT", nullable = true, repeated = true)
+            override val bqProps = BqProperties("RECORD", nullable = true, repeated = true)
 
             override fun toBq(): Any? = value?.map { it.toContent() }
         }

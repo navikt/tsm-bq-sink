@@ -19,11 +19,14 @@ class SykmeldingBqMapperServiceIntegrationTest : BigQueryTestContainer() {
     val mappers = SykmeldingBqMappersService(hashService = HashService(environment))
 
     @Test
-    fun `verify nullability on a basic insert`() {
+    fun `verify nullability and schema types on a basic insert (digital)`() {
         val sykmelding = digitalSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
-        val meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
+        val sykmeldingBqPayload = mappers.toNasjonalBqPayload(
+            sykmelding,
+            meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
+        )
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
-            .addRow(sykmelding.sykmelding.id, mappers.toNasjonalBqPayload(sykmelding, meta).toContent())
+            .addRow(sykmelding.sykmelding.id, sykmeldingBqPayload.toContent())
             .build()
 
         val response = bigQuery.insertAll(request)
@@ -55,16 +58,76 @@ class SykmeldingBqMapperServiceIntegrationTest : BigQueryTestContainer() {
             if (field.mode == Field.Mode.REQUIRED) {
                 requireNotNull(row.get(field.name).value) { "Required field ${field.name} is null in the inserted row" }
             }
+
+            val actual = sykmeldingBqPayload.get(field.name)
+            if (actual != null) {
+                require(actual.bqProps.name == field.type.name()) {
+                    "Field ${field.name} has type ${field.type.name()} in the schema but ${actual.bqProps.name} in the mapped payload"
+                }
+            }
         }
     }
 
     @Test
-    fun `verify nullability on a utenlandsk insert`() {
+    fun `verify nullability and schema types on a basic insert (XML)`() {
+        val sykmelding = xmlSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
+        val sykmeldingBqPayload = mappers.toNasjonalBqPayload(
+            sykmelding,
+            meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
+        )
+        val request = InsertAllRequest.newBuilder(SYKMELDINGER_TABLE)
+            .addRow(sykmelding.sykmelding.id, sykmeldingBqPayload.toContent())
+            .build()
+
+        val response = bigQuery.insertAll(request)
+        check(!response.hasErrors()) { "BigQuery rejected the record: ${response.insertErrors}" }
+        val row = requireNotNull(
+            bigQuery.query(
+                QueryJobConfiguration.newBuilder(
+                    "SELECT * FROM `${DATASET_ID}.sykmeldinger` WHERE id = '${sykmelding.sykmelding.id}' LIMIT 1"
+                ).build()
+            ).values.firstOrNull()
+        ) { "Inserted row not found in BigQuery" }
+
+        val table =
+            requireNotNull(bigQuery.getTable(SYKMELDINGER_TABLE)) { "Table ${SYKMELDINGER_TABLE} does not exist" }
+        val schema =
+            requireNotNull(table.getDefinition<StandardTableDefinition>().schema) { "Table ${SYKMELDINGER_TABLE} has no schema" }
+
+        schema.fields.forEach { field ->
+            println("${field.name} ${field.type} (${field.mode}) = ${row.get(field.name).value}")
+            if (field.mode == Field.Mode.REPEATED && field.type == LegacySQLTypeName.RECORD) {
+                field.subFields.forEach { sf ->
+                    println("  - ${sf.name} ${field.type} (${sf.mode}) = ${row.get(field.name).value}")
+                }
+            }
+            if (field.mode == Field.Mode.REPEATED && field.type == LegacySQLTypeName.JSON) {
+                println("  - ${field.name} is a repeated JSON field")
+            }
+
+            if (field.mode == Field.Mode.REQUIRED) {
+                requireNotNull(row.get(field.name).value) { "Required field ${field.name} is null in the inserted row" }
+            }
+
+            val actual = sykmeldingBqPayload.get(field.name)
+            if (actual != null) {
+                require(actual.bqProps.name == field.type.name()) {
+                    "Field ${field.name} has type ${field.type.name()} in the schema but ${actual.bqProps.name} in the mapped payload"
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `verify nullability and schema types on a utenlandsk insert`() {
         // Insert one sykmelding
         val sykmelding: SykmeldingRecord.Utenlandsk = utenlandskSykmelding("b8e9c32c-9a1e-4a85-8e67-e9284f5c9fd6")
-        val meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
+        val sykmeldingBqPayload = mappers.toUtenlandskBqPayload(
+            sykmelding,
+            meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
+        )
         val request = InsertAllRequest.newBuilder(SYKMELDINGER_UTENLANDSK_TABLE)
-            .addRow(sykmelding.sykmelding.id, mappers.toUtenlandskBqPayload(sykmelding, meta).toContent())
+            .addRow(sykmelding.sykmelding.id, sykmeldingBqPayload.toContent())
             .build()
 
         val response = bigQuery.insertAll(request)
@@ -85,6 +148,11 @@ class SykmeldingBqMapperServiceIntegrationTest : BigQueryTestContainer() {
         schema.fields.forEach { field ->
             if (field.mode == Field.Mode.REQUIRED) {
                 requireNotNull(row.get(field.name).value) { "Required field ${field.name} is null in the inserted row" }
+            }
+
+            val actual = sykmeldingBqPayload.get(field.name)
+            require(actual?.bqProps?.name == field.type.name()) {
+                "Field ${field.name} has type ${field.type.name()} in the schema but ${actual?.bqProps?.name} in the mapped payload"
             }
         }
     }

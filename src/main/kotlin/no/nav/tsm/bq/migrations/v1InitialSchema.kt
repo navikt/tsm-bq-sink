@@ -15,11 +15,11 @@ val baseSchema = listOf(
     nonNullableField("type", StandardSQLTypeName.STRING),
     // Regelutfall
     nonNullableField("regelutfall", StandardSQLTypeName.STRING),
-    nonNullableField("regelutfall_timestamp", StandardSQLTypeName.STRING),
+    nonNullableField("regelutfall_timestamp", StandardSQLTypeName.DATETIME),
     arrayRecord(
         "regelutfall_historikk",
         nonNullableField("type", StandardSQLTypeName.STRING),
-        nonNullableField("timestamp", StandardSQLTypeName.STRING),
+        nonNullableField("timestamp", StandardSQLTypeName.DATETIME),
         nonNullableField("status", StandardSQLTypeName.STRING),
         nullableField("reason_sykmelder", StandardSQLTypeName.STRING),
         nullableField("reason_sykmeldt", StandardSQLTypeName.STRING),
@@ -48,7 +48,7 @@ val baseSchema = listOf(
     nonNullableField("svangerskapsrelatert", StandardSQLTypeName.BOOL),
     nonNullableField("skjermet_for_pasient", StandardSQLTypeName.BOOL),
     nullableField("yrkesskadedato", StandardSQLTypeName.DATE),
-    nullableField("syketilfelle_start_dato", StandardSQLTypeName.STRING),
+    nullableField("syketilfelle_start_dato", StandardSQLTypeName.DATE),
     nullableField("annen_fravers_arsak", StandardSQLTypeName.STRING),
     nullableField("annen_fravers_arsak_beskrivelse", StandardSQLTypeName.STRING),
     // Aktivitet
@@ -121,8 +121,8 @@ val nasjonalSykmeldingSchema = Schema.of(
 val utenlandskSykmeldingSchema = Schema.of(
     baseSchema + listOf(
         nonNullableField("meta_land", StandardSQLTypeName.STRING),
-        nonNullableField("meta_folkeregistertadresse_er_brakke_eller_tilsvarende", StandardSQLTypeName.STRING),
-        nullableField("meta_er_adresse_utland", StandardSQLTypeName.STRING),
+        nonNullableField("meta_folkeregistertadresse_er_brakke_eller_tilsvarende", StandardSQLTypeName.BOOL),
+        nullableField("meta_er_adresse_utland", StandardSQLTypeName.BOOL),
     )
 )
 
