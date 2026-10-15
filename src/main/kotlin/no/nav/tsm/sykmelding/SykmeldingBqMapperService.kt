@@ -25,7 +25,30 @@ class SykmeldingBqMappersService(
             "fom" to BqTypes.Date(sykmelding.aktivitet.minOf { aktivitet -> aktivitet.fom }),
             "tom" to BqTypes.Date(sykmelding.aktivitet.maxOf { aktivitet -> aktivitet.tom }),
             "type" to BqTypes.String(sykmelding.type.name),
-            "regelutfall" to BqTypes.String(validation.status.name),
+            "regelutfall" to BqTypes.Enum(validation.status),
+            "regelutfall_timestamp" to BqTypes.DateTime(validation.timestamp),
+            "regelutfall_historikk" to BqTypes.RecordArray(validation.rules.map {
+                val historikk = BqPayload(
+                    "type" to BqTypes.Enum(it.type),
+                    "timestamp" to BqTypes.DateTime(it.timestamp),
+                    "status" to BqTypes.Enum(it.validationType),
+                )
+
+                val reason = when (it) {
+                    is Rule.Invalid -> it.reason
+                    is Rule.Pending -> it.reason
+                    else -> null
+                }
+
+                if (reason != null) {
+                    historikk.add(
+                        "reason_sykmelder" to BqTypes.String.Nullable(reason.sykmelder),
+                        "reason_sykmeldt" to BqTypes.String.Nullable(reason.sykmeldt),
+                    )
+                }
+
+                historikk
+            }),
             "perioder" to BqTypes.RecordArray(sykmelding.aktivitet.map { periodeToBqPayload(it) }),
             "kafka_partition" to BqTypes.Long(meta.partition.toLong()),
             "kafka_offset" to BqTypes.Long(meta.offset),

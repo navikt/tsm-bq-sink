@@ -88,8 +88,23 @@ fun digitalSykmelding(id: String): SykmeldingRecord = SykmeldingRecord.Digital(
     ),
     validation = ValidationResult(
         status = RuleType.OK,
-        rules = emptyList(),
-        timestamp = OffsetDateTime.now()
+        timestamp = OffsetDateTime.now(),
+        rules = listOf(
+            Rule.OK(
+                name = "Test rule",
+                timestamp = OffsetDateTime.now(),
+                validationType = ValidationType.MANUAL,
+            ),
+            Rule.Pending(
+                name = "Test rule",
+                timestamp = OffsetDateTime.now().minusDays(1),
+                validationType = ValidationType.AUTOMATIC,
+                reason = Reason(
+                    sykmeldt = "Melding til sykmeldt",
+                    sykmelder = "Melding til sykmelder",
+                )
+            )
+        ),
     )
 )
 

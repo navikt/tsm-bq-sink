@@ -13,7 +13,17 @@ val baseSchema = listOf(
     nonNullableField("fom", StandardSQLTypeName.DATE),
     nonNullableField("tom", StandardSQLTypeName.DATE),
     nonNullableField("type", StandardSQLTypeName.STRING),
+    // Regelutfall
     nonNullableField("regelutfall", StandardSQLTypeName.STRING),
+    nonNullableField("regelutfall_timestamp", StandardSQLTypeName.STRING),
+    arrayRecord(
+        "regelutfall_historikk",
+        nonNullableField("type", StandardSQLTypeName.STRING),
+        nonNullableField("timestamp", StandardSQLTypeName.STRING),
+        nonNullableField("status", StandardSQLTypeName.STRING),
+        nullableField("reason_sykmelder", StandardSQLTypeName.STRING),
+        nullableField("reason_sykmeldt", StandardSQLTypeName.STRING),
+    ),
     // Kafka metadata used for de-duplication and ordering
     nonNullableField("kafka_partition", StandardSQLTypeName.INT64),
     nonNullableField("kafka_offset", StandardSQLTypeName.INT64),
@@ -145,10 +155,15 @@ private fun createSykmeldingerTable(bigQuery: BigQuery) {
         .setTableConstraints(tableConstraint)
         .build()
 
+    val regelutfallClustering = Clustering.newBuilder()
+        .setFields(listOf("regelutfall", "type", "meta_avsender_system"))
+        .build()
+
     val utenlandskTableDefinition = StandardTableDefinition.newBuilder()
         .setSchema(utenlandskSykmeldingSchema)
         .setTimePartitioning(timePartitioning)
         .setTableConstraints(tableConstraint)
+        .setClustering(regelutfallClustering)
         .build()
 
     bigQuery.create(TableInfo.newBuilder(SYKMELDINGER_TABLE, nasjonalTableDefinition).build())
