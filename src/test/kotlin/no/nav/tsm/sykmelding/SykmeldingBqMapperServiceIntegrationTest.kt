@@ -107,7 +107,9 @@ class SykmeldingBqMapperServiceIntegrationTest : BigQueryTestContainer() {
             "prognose_arbeid_ikke_i_arbeid_arbeidsfor_pa_sikt",
             "prognose_arbeid_ikke_i_arbeid_arbeidsfor_fom",
             "prognose_arbeid_i_arbeid_eget_arbeid_pa_sikt",
-            "prognose_arbeid_i_arbeid_arbeid_fom"
+            "prognose_arbeid_i_arbeid_arbeid_fom",
+            "tiltak_nav",
+            "tiltak_andre"
         )
         schema.fields.forEach {
             if (expectedMissingInDigital.contains(it.name)) {

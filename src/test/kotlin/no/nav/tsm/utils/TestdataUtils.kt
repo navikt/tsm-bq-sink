@@ -212,7 +212,10 @@ fun xmlSykmelding(id: String) = SykmeldingRecord.Xml(
                 arbeidFOM = null
             )
         ),
-        tiltak = null,
+        tiltak = Tiltak(
+            tiltakNav = "Dette er et tiltak fra NAV",
+            andreTiltak = "Dette er et annet tiltak fra NAV"
+        ),
     ),
     validation = ValidationResult(
         status = RuleType.OK,

@@ -224,6 +224,13 @@ class SykmeldingBqMappersService(
             }
         }
 
+        sykmelding.whenLegacyTiltak { tiltak ->
+            payload.add(
+                "tiltak_nav" to BqTypes.String.Nullable(tiltak.tiltakNav),
+                "tiltak_andre" to BqTypes.String.Nullable(tiltak.andreTiltak),
+            )
+        }
+
         return payload
     }
 }
@@ -237,6 +244,12 @@ private fun Sykmelding.whenDigitalUtypendeSporsmal(block: (List<UtdypendeSporsma
 private fun Sykmelding.whenLegacyUtdypendeSorsmal(block: (Map<String, Map<String, SporsmalSvar>>) -> Unit) {
     if (this is Sykmelding.Nasjonal.Legacy && this.utdypendeOpplysninger != null) {
         block(this.utdypendeOpplysninger as Map<String, Map<String, SporsmalSvar>>)
+    }
+}
+
+private fun Sykmelding.whenLegacyTiltak(block: (Tiltak) -> Unit) {
+    if (this is Sykmelding.Nasjonal.Legacy && this.tiltak != null) {
+        block(this.tiltak as Tiltak)
     }
 }
 
