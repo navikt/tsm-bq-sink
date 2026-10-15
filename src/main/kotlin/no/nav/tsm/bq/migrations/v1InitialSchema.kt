@@ -82,7 +82,17 @@ val nasjonalSykmeldingSchema = Schema.of(
         nullableField("bistand_nav_beskrivelse", StandardSQLTypeName.STRING),
         // Tilbakedatering
         nullableField("tilbakedatering_kontaktdato", StandardSQLTypeName.DATE),
-        nullableField("tilbakedatering_begrunnelse", StandardSQLTypeName.STRING)
+        nullableField("tilbakedatering_begrunnelse", StandardSQLTypeName.STRING),
+        // Prognose
+        nullableField("prognose_arbeidsfor_etter_periode", StandardSQLTypeName.BOOL),
+        nullableField("prognose_hensyn_arbeidsplassen", StandardSQLTypeName.STRING),
+        nullableField("prognose_arbeid_type", StandardSQLTypeName.STRING),
+        nullableField("prognose_arbeid_vurderingsdato", StandardSQLTypeName.DATE),
+        nullableField("prognose_arbeid_ikke_i_arbeid_arbeidsfor_pa_sikt", StandardSQLTypeName.BOOL),
+        nullableField("prognose_arbeid_ikke_i_arbeid_arbeidsfor_fom", StandardSQLTypeName.DATE),
+        nullableField("prognose_arbeid_i_arbeid_eget_arbeid_pa_sikt", StandardSQLTypeName.BOOL),
+        nullableField("prognose_arbeid_i_arbeid_annet_arbeid_pa_sikt", StandardSQLTypeName.BOOL),
+        nullableField("prognose_arbeid_i_arbeid_arbeid_fom", StandardSQLTypeName.DATE),
     )
 )
 

@@ -96,7 +96,19 @@ class SykmeldingBqMapperServiceIntegrationTest : BigQueryTestContainer() {
         val meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
         val mapped = mappers.toNasjonalBqPayload(sykmelding, meta)
 
-        val expectedMissingInDigital = listOf("meta_regelsett_versjon", "syketilfelle_start_dato", "annen_fravers_arsak_beskrivelse")
+        val expectedMissingInDigital = listOf(
+            "meta_regelsett_versjon",
+            "syketilfelle_start_dato",
+            "annen_fravers_arsak_beskrivelse",
+            "prognose_arbeidsfor_etter_periode",
+            "prognose_hensyn_arbeidsplassen",
+            "prognose_arbeid_type",
+            "prognose_arbeid_vurderingsdato",
+            "prognose_arbeid_ikke_i_arbeid_arbeidsfor_pa_sikt",
+            "prognose_arbeid_ikke_i_arbeid_arbeidsfor_fom",
+            "prognose_arbeid_i_arbeid_eget_arbeid_pa_sikt",
+            "prognose_arbeid_i_arbeid_arbeid_fom"
+        )
         schema.fields.forEach {
             if (expectedMissingInDigital.contains(it.name)) {
                 println("Field ${it.name} is in the schema but not in the mapped payload, skipping")
@@ -128,7 +140,16 @@ class SykmeldingBqMapperServiceIntegrationTest : BigQueryTestContainer() {
         val meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
         val mapped = mappers.toNasjonalBqPayload(sykmelding, meta)
 
+        val expectedMissingInDigital = listOf(
+            "prognose_arbeid_ikke_i_arbeid_arbeidsfor_pa_sikt",
+            "prognose_arbeid_ikke_i_arbeid_arbeidsfor_fom",
+        )
         schema.fields.forEach {
+            if (expectedMissingInDigital.contains(it.name)) {
+                println("Field ${it.name} is in the schema but not in the mapped payload, skipping")
+                return@forEach
+            }
+
             val actual = requireNotNull(mapped.get(it.name)) {
                 "Field ${it.name} (${it.type}, ${it.mode}) is in the schema but not in the mapped payload"
             }

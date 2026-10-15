@@ -138,6 +138,7 @@ class SykmeldingBqMappersService(
                     "arbeidsgiver_tiltak_arbeidsplassen" to BqTypes.String.Nullable(ag.tiltakArbeidsplassen),
                 )
             }
+
             is ArbeidsgiverInfo.Flere -> {
                 payload.add(
                     "arbeidsgiver_navn" to BqTypes.String.Nullable(ag.navn),
@@ -149,48 +150,94 @@ class SykmeldingBqMappersService(
             is ArbeidsgiverInfo.Ingen -> {}
         }
 
-        return payload
-    }
+        val legacyPrognose = when (sykmelding) {
+            is Sykmelding.Xml -> sykmelding.prognose
+            is Sykmelding.Papir -> sykmelding.prognose
+            is Sykmelding.Digital -> null
+        }
 
-    private fun periodeToBqPayload(aktivitet: Aktivitet): BqPayload {
-        val payload = BqPayload(
-            "type" to BqTypes.Enum(aktivitet.type),
-            "fom" to BqTypes.Date(aktivitet.fom),
-            "tom" to BqTypes.Date(aktivitet.tom),
-        )
+        if (legacyPrognose != null) {
+            payload.add(
+                "prognose_arbeidsfor_etter_periode" to BqTypes.Boolean.Nullable(legacyPrognose.arbeidsforEtterPeriode),
+                "prognose_hensyn_arbeidsplassen" to BqTypes.String.Nullable(legacyPrognose.hensynArbeidsplassen)
+            )
 
-        when (aktivitet) {
-            is Aktivitet.IkkeMulig -> {
-                payload.add(
-                    "medisinsk_arsak_arsak" to BqTypes.Enum.Nullable(aktivitet.medisinskArsak?.arsak?.firstOrNull()),
-                    "medisinsk_arsak_beskrivelse" to BqTypes.String.Nullable(aktivitet.medisinskArsak?.beskrivelse),
-                    "arbeidsrelatert_arsak" to BqTypes.Enum.Nullable(aktivitet.arbeidsrelatertArsak?.arsak?.firstOrNull()),
-                    "arbeidsrelatert_arsak_beskrivelse" to BqTypes.String.Nullable(aktivitet.arbeidsrelatertArsak?.beskrivelse)
-                )
+            when (val arbeid = legacyPrognose.arbeid) {
+                is IArbeid.ErIArbeid -> {
+                    payload.add(
+                        "prognose_arbeid_type" to BqTypes.Enum.Nullable(arbeid.type),
+                        "prognose_arbeid_vurderingsdato" to BqTypes.Date.Nullable(arbeid.vurderingsdato),
+                        "prognose_arbeid_i_arbeid_eget_arbeid_pa_sikt" to BqTypes.Boolean.Nullable(arbeid.egetArbeidPaSikt),
+                        "prognose_arbeid_i_arbeid_annet_arbeid_pa_sikt" to BqTypes.Boolean.Nullable(arbeid.annetArbeidPaSikt),
+                        "prognose_arbeid_i_arbeid_arbeid_fom" to BqTypes.Date.Nullable(arbeid.arbeidFOM)
+                    )
+                }
+
+                is IArbeid.ErIkkeIArbeid -> {
+                    payload.add(
+                        "prognose_arbeid_type" to BqTypes.Enum.Nullable(arbeid.type),
+                        "prognose_arbeid_vurderingsdato" to BqTypes.Date.Nullable(arbeid.vurderingsdato),
+                        "prognose_arbeid_ikke_i_arbeid_arbeidsfor_pa_sikt" to BqTypes.Boolean.Nullable(arbeid.arbeidsforPaSikt),
+                        "prognose_arbeid_ikke_i_arbeid_arbeidsfor_fom" to BqTypes.Date.Nullable(arbeid.arbeidsforFOM)
+                    )
+                }
+                null -> {}
             }
+        }
 
-            is Aktivitet.Avventende -> {
-                payload.add(
-                    "avventene_innspill_til_arbeidsgiver" to BqTypes.String.Nullable(aktivitet.innspillTilArbeidsgiver)
-                )
-            }
+        val digitalPrognose: DigitalPrognose? = if (sykmelding is Sykmelding.Digital && sykmelding.prognose != null) {
+            sykmelding.prognose
+        } else null
 
-            is Aktivitet.Behandlingsdager -> {
-                payload.add(
-                    "enkeltstaende_behandlingsdager" to BqTypes.Long.Nullable(aktivitet.antallBehandlingsdager.toLong())
-                )
-            }
-
-            is Aktivitet.Gradert -> {
-                payload.add(
-                    "grad" to BqTypes.Long(aktivitet.grad.toLong()),
-                    "gradert_reisetilskudd" to BqTypes.Boolean(aktivitet.reisetilskudd)
-                )
-            }
-
-            is Aktivitet.Reisetilskudd -> {}
+        if (digitalPrognose != null) {
+            payload.add(
+                "prognose_arbeid_i_arbeid_annet_arbeid_pa_sikt" to BqTypes.Boolean.Nullable(digitalPrognose.friskmeldingTilArbeidsformidling),
+            )
         }
 
         return payload
     }
 }
+
+private fun periodeToBqPayload(aktivitet: Aktivitet): BqPayload {
+    val payload = BqPayload(
+        "type" to BqTypes.Enum(aktivitet.type),
+        "fom" to BqTypes.Date(aktivitet.fom),
+        "tom" to BqTypes.Date(aktivitet.tom),
+    )
+
+    when (aktivitet) {
+        is Aktivitet.IkkeMulig -> {
+            payload.add(
+                "medisinsk_arsak_arsak" to BqTypes.Enum.Nullable(aktivitet.medisinskArsak?.arsak?.firstOrNull()),
+                "medisinsk_arsak_beskrivelse" to BqTypes.String.Nullable(aktivitet.medisinskArsak?.beskrivelse),
+                "arbeidsrelatert_arsak" to BqTypes.Enum.Nullable(aktivitet.arbeidsrelatertArsak?.arsak?.firstOrNull()),
+                "arbeidsrelatert_arsak_beskrivelse" to BqTypes.String.Nullable(aktivitet.arbeidsrelatertArsak?.beskrivelse)
+            )
+        }
+
+        is Aktivitet.Avventende -> {
+            payload.add(
+                "avventene_innspill_til_arbeidsgiver" to BqTypes.String.Nullable(aktivitet.innspillTilArbeidsgiver)
+            )
+        }
+
+        is Aktivitet.Behandlingsdager -> {
+            payload.add(
+                "enkeltstaende_behandlingsdager" to BqTypes.Long.Nullable(aktivitet.antallBehandlingsdager.toLong())
+            )
+        }
+
+        is Aktivitet.Gradert -> {
+            payload.add(
+                "grad" to BqTypes.Long(aktivitet.grad.toLong()),
+                "gradert_reisetilskudd" to BqTypes.Boolean(aktivitet.reisetilskudd)
+            )
+        }
+
+        is Aktivitet.Reisetilskudd -> {}
+    }
+
+    return payload
+}
+

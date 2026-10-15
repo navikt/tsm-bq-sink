@@ -77,7 +77,7 @@ fun digitalSykmelding(id: String): SykmeldingRecord = SykmeldingRecord.Digital(
         tilbakedatering = null,
         bistandNav = null,
         utdypendeSporsmal = null,
-        prognose = null,
+        prognose = DigitalPrognose(friskmeldingTilArbeidsformidling = false),
     ),
     validation = ValidationResult(
         status = RuleType.OK,
@@ -187,7 +187,16 @@ fun xmlSykmelding(id: String) = SykmeldingRecord.Xml(
         tilbakedatering = null,
         bistandNav = null,
         utdypendeOpplysninger = null,
-        prognose = null,
+        prognose = Prognose(
+            arbeidsforEtterPeriode = false,
+            hensynArbeidsplassen = null,
+            arbeid = IArbeid.ErIArbeid(
+                vurderingsdato = null,
+                egetArbeidPaSikt = false,
+                annetArbeidPaSikt = false,
+                arbeidFOM = null
+            )
+        ),
         tiltak = null,
     ),
     validation = ValidationResult(
