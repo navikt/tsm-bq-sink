@@ -76,7 +76,14 @@ fun digitalSykmelding(id: String): SykmeldingRecord = SykmeldingRecord.Digital(
         ),
         tilbakedatering = null,
         bistandNav = null,
-        utdypendeSporsmal = null,
+        utdypendeSporsmal = listOf(
+            UtdypendeSporsmal(
+                svar = "Dette er et svar",
+                type = Sporsmalstype.MEDISINSKE_HENSYN,
+                skjermetForArbeidsgiver = false,
+                sporsmal = "Dette er et spørsmål"
+            )
+        ),
         prognose = DigitalPrognose(friskmeldingTilArbeidsformidling = false),
     ),
     validation = ValidationResult(
@@ -186,7 +193,15 @@ fun xmlSykmelding(id: String) = SykmeldingRecord.Xml(
         ),
         tilbakedatering = null,
         bistandNav = null,
-        utdypendeOpplysninger = null,
+        utdypendeOpplysninger = mapOf(
+            "6.3" to mapOf(
+                "6.3.1" to SporsmalSvar(
+                    sporsmal = "Dette er et spørsmål",
+                    svar = "Dette er et svar",
+                    restriksjoner = listOf(SvarRestriksjon.SKJERMET_FOR_ARBEIDSGIVER),
+                )
+            )
+        ),
         prognose = Prognose(
             arbeidsforEtterPeriode = false,
             hensynArbeidsplassen = null,

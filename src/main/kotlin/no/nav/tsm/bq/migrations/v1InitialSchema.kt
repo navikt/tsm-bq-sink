@@ -93,6 +93,15 @@ val nasjonalSykmeldingSchema = Schema.of(
         nullableField("prognose_arbeid_i_arbeid_eget_arbeid_pa_sikt", StandardSQLTypeName.BOOL),
         nullableField("prognose_arbeid_i_arbeid_annet_arbeid_pa_sikt", StandardSQLTypeName.BOOL),
         nullableField("prognose_arbeid_i_arbeid_arbeid_fom", StandardSQLTypeName.DATE),
+        // Utdypende spørsmål
+        arrayRecord(
+            "utdypende_sporsmal",
+            nonNullableField("type", StandardSQLTypeName.STRING),
+            nonNullableField("svar", StandardSQLTypeName.STRING),
+            nonNullableField("skjermetForArbeidsgiver", StandardSQLTypeName.BOOL),
+            nullableField("sporsmal", StandardSQLTypeName.STRING),
+            nullableField("feltnummer", StandardSQLTypeName.STRING),
+        )
     )
 )
 

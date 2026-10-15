@@ -1,11 +1,9 @@
 package no.nav.tsm.sykmelding
 
-import com.google.cloud.bigquery.StandardSQLTypeName
 import com.google.cloud.bigquery.TableId
 import no.nav.tsm.bq.BqPayload
 import no.nav.tsm.bq.BqTypes
 import no.nav.tsm.bq.DATASET_ID
-import no.nav.tsm.bq.nullableField
 import no.nav.tsm.ktor.kafka.consumer.RecordMeta
 import no.nav.tsm.sykmelding.input.core.model.*
 import no.nav.tsm.sykmelding.input.core.model.metadata.MessageMetadata
@@ -181,6 +179,7 @@ class SykmeldingBqMappersService(
                         "prognose_arbeid_ikke_i_arbeid_arbeidsfor_fom" to BqTypes.Date.Nullable(arbeid.arbeidsforFOM)
                     )
                 }
+
                 null -> {}
             }
         }
@@ -195,7 +194,49 @@ class SykmeldingBqMappersService(
             )
         }
 
+        sykmelding.whenDigitalUtypendeSporsmal { utdypendeSporsmal ->
+            payload.add(
+                "utdypende_sporsmal" to BqTypes.RecordArray(utdypendeSporsmal.map {
+                    BqPayload(
+                        "type" to BqTypes.Enum(it.type),
+                        "svar" to BqTypes.String(it.svar),
+                        "skjermetForArbeidsgiver" to BqTypes.Boolean(it.skjermetForArbeidsgiver),
+                        "sporsmal" to BqTypes.String.Nullable(it.sporsmal),
+                    )
+                })
+            )
+        }
+
+        sykmelding.whenLegacyUtdypendeSorsmal { utdypendeOpplysninger ->
+            val legacyUtdypendeSporsmal = utdypendeOpplysninger.toSykInnUtdypendeSpm()
+            if (legacyUtdypendeSporsmal != null) {
+                payload.add(
+                    "utdypende_sporsmal" to BqTypes.RecordArray(legacyUtdypendeSporsmal.map {
+                        BqPayload(
+                            "type" to BqTypes.Enum(it.type),
+                            "svar" to BqTypes.String(it.svar),
+                            "skjermetForArbeidsgiver" to BqTypes.Boolean(it.skjermetForArbeidsgiver),
+                            "sporsmal" to BqTypes.String.Nullable(it.sporsmal),
+                            "feltnummer" to BqTypes.String.Nullable(it.feltnummer),
+                        )
+                    })
+                )
+            }
+        }
+
         return payload
+    }
+}
+
+private fun Sykmelding.whenDigitalUtypendeSporsmal(block: (List<UtdypendeSporsmal>) -> Unit) {
+    if (this is Sykmelding.Digital && this.utdypendeSporsmal != null) {
+        block(this.utdypendeSporsmal as List<UtdypendeSporsmal>)
+    }
+}
+
+private fun Sykmelding.whenLegacyUtdypendeSorsmal(block: (Map<String, Map<String, SporsmalSvar>>) -> Unit) {
+    if (this is Sykmelding.Nasjonal.Legacy && this.utdypendeOpplysninger != null) {
+        block(this.utdypendeOpplysninger as Map<String, Map<String, SporsmalSvar>>)
     }
 }
 
