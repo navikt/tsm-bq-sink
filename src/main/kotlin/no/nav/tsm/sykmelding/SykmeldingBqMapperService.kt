@@ -92,7 +92,11 @@ class SykmeldingBqMappersService(
 
     fun toUtenlandskBqPayload(record: SykmeldingRecord.Utenlandsk, meta: RecordMeta): BqPayload = record
         .toCommonBqPayload(meta)
-        .add("meta_land" to BqTypes.String(record.sykmelding.utenlandskInfo.land))
+        .add(
+            "meta_land" to BqTypes.String(record.sykmelding.utenlandskInfo.land),
+            "meta_folkeregistertadresse_er_brakke_eller_tilsvarende" to BqTypes.Boolean(record.sykmelding.utenlandskInfo.folkeRegistertAdresseErBrakkeEllerTilsvarende),
+            "meta_er_adresse_utland" to BqTypes.Boolean.Nullable(record.sykmelding.utenlandskInfo.erAdresseUtland)
+        )
 
     fun toNasjonalBqPayload(record: SykmeldingRecord, meta: RecordMeta): BqPayload {
         val sykmelding = record.sykmelding

@@ -111,6 +111,8 @@ val nasjonalSykmeldingSchema = Schema.of(
 val utenlandskSykmeldingSchema = Schema.of(
     baseSchema + listOf(
         nonNullableField("meta_land", StandardSQLTypeName.STRING),
+        nonNullableField("meta_folkeregistertadresse_er_brakke_eller_tilsvarende", StandardSQLTypeName.STRING),
+        nullableField("meta_er_adresse_utland", StandardSQLTypeName.STRING),
     )
 )
 
