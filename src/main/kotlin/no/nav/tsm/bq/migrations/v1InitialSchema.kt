@@ -72,6 +72,11 @@ val nasjonalSykmeldingSchema = Schema.of(
         nullableField("behandler_hpr_nr", StandardSQLTypeName.STRING),
         nullableField("behandler_her_id", StandardSQLTypeName.STRING),
         nullableField("behandler_ident_sha256", StandardSQLTypeName.STRING),
+        // Arbeidsgiver
+        nonNullableField("arbeidsgiver_antall_type", StandardSQLTypeName.STRING),
+        nullableField("arbeidsgiver_navn", StandardSQLTypeName.STRING),
+        nullableField("arbeidsgiver_melding_til_arbeidsgiver", StandardSQLTypeName.STRING),
+        nullableField("arbeidsgiver_tiltak_arbeidsplassen", StandardSQLTypeName.STRING),
     )
 )
 

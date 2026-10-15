@@ -117,8 +117,29 @@ class SykmeldingBqMappersService(
                 sykmelding.behandler.ids.find { it.type == PersonIdType.FNR || it.type == PersonIdType.DNR }?.id?.let {
                     hashService.hashIdent(it.trim())
                 }
-            )
+            ),
+            // Arbeidsgiver
+            "arbeidsgiver_antall_type" to BqTypes.Enum(sykmelding.arbeidsgiver.type),
         )
+
+        when (val ag = sykmelding.arbeidsgiver) {
+            is ArbeidsgiverInfo.En -> {
+                payload.add(
+                    "arbeidsgiver_navn" to BqTypes.String.Nullable(ag.navn),
+                    "arbeidsgiver_melding_til_arbeidsgiver" to BqTypes.String.Nullable(ag.meldingTilArbeidsgiver),
+                    "arbeidsgiver_tiltak_arbeidsplassen" to BqTypes.String.Nullable(ag.tiltakArbeidsplassen),
+                )
+            }
+            is ArbeidsgiverInfo.Flere -> {
+                payload.add(
+                    "arbeidsgiver_navn" to BqTypes.String.Nullable(ag.navn),
+                    "arbeidsgiver_melding_til_arbeidsgiver" to BqTypes.String.Nullable(ag.meldingTilArbeidsgiver),
+                    "arbeidsgiver_tiltak_arbeidsplassen" to BqTypes.String.Nullable(ag.tiltakArbeidsplassen),
+                )
+            }
+
+            is ArbeidsgiverInfo.Ingen -> {}
+        }
 
         return payload
     }
