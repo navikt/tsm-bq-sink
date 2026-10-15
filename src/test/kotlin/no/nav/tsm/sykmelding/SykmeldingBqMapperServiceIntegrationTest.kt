@@ -1,14 +1,11 @@
-package no.nav.tsm.bq
+package no.nav.tsm.sykmelding
 
 import com.google.cloud.bigquery.*
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.tsm.bq.DATASET_ID
 import no.nav.tsm.core.Environment
 import no.nav.tsm.ktor.kafka.consumer.RecordMeta
-import no.nav.tsm.sykmelding.HashService
-import no.nav.tsm.sykmelding.SYKMELDINGER_TABLE
-import no.nav.tsm.sykmelding.SYKMELDINGER_UTENLANDSK_TABLE
-import no.nav.tsm.sykmelding.SykmeldingBqMappersService
 import no.nav.tsm.sykmelding.input.core.model.SykmeldingRecord
 import no.nav.tsm.utils.BigQueryTestContainer
 import no.nav.tsm.utils.digitalSykmelding
@@ -16,7 +13,7 @@ import no.nav.tsm.utils.utenlandskSykmelding
 import no.nav.tsm.utils.xmlSykmelding
 import org.junit.Test
 
-class BigQuerySykmeldingerTest : BigQueryTestContainer() {
+class SykmeldingBqMapperServiceIntegrationTest : BigQueryTestContainer() {
 
     val environment = mockk<Environment>(relaxed = true).apply { every { hashSecret } returns "test-secret" }
     val mappers = SykmeldingBqMappersService(hashService = HashService(environment))
@@ -99,7 +96,7 @@ class BigQuerySykmeldingerTest : BigQueryTestContainer() {
         val meta = RecordMeta(sykmelding.sykmelding.id, "topic", 0, 0L, 0L, mockk(relaxed = true))
         val mapped = mappers.toNasjonalBqPayload(sykmelding, meta)
 
-        val expectedMissingInDigital = listOf("meta_regelsett_versjon", "syketilfellet_start_dato")
+        val expectedMissingInDigital = listOf("meta_regelsett_versjon", "syketilfelle_start_dato", "annen_fravers_arsak_beskrivelse")
         schema.fields.forEach {
             if (expectedMissingInDigital.contains(it.name)) {
                 println("Field ${it.name} is in the schema but not in the mapped payload, skipping")

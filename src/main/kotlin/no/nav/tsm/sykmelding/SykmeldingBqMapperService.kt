@@ -52,12 +52,13 @@ class SykmeldingBqMappersService(
 
         when (val mv = this.sykmelding.medisinskVurdering) {
             is MedisinskVurdering.Digital -> payload.add(
-                "annen_fravers_arsak" to BqTypes.Enum.Nullable(mv.annenFravarsgrunn)
+                "annen_fravers_arsak" to BqTypes.Enum.Nullable(mv.annenFravarsgrunn),
             )
 
             is MedisinskVurdering.Legacy -> payload.add(
-                "syketilfellet_start_dato" to BqTypes.Date.Nullable(mv.syketilfelletStartDato),
-                "annen_fravers_arsak" to BqTypes.Enum.Nullable(mv.annenFraversArsak?.arsak?.firstOrNull())
+                "syketilfelle_start_dato" to BqTypes.Date.Nullable(mv.syketilfelletStartDato),
+                "annen_fravers_arsak" to BqTypes.Enum.Nullable(mv.annenFraversArsak?.arsak?.firstOrNull()),
+                "annen_fravers_arsak_beskrivelse" to BqTypes.String.Nullable(mv.annenFraversArsak?.beskrivelse),
             )
         }
 
@@ -100,14 +101,23 @@ class SykmeldingBqMappersService(
         }
 
         val payload = record.toCommonBqPayload(meta).add(
+            // Sykmelder (signerende)
+            "sykmelder_hpr_nr" to BqTypes.String.Nullable(sykmelding.sykmelder.ids.find { it.type == PersonIdType.HPR }?.id?.trim()),
+            "sykmelder_her_id" to BqTypes.String.Nullable(sykmelding.sykmelder.ids.find { it.type == PersonIdType.HER }?.id?.trim()),
+            "sykmelder_ident_sha256" to BqTypes.String.Nullable(
+                sykmelding.sykmelder.ids.find { it.type == PersonIdType.FNR || it.type == PersonIdType.DNR }?.id?.let {
+                    hashService.hashIdent(it.trim())
+                }
+            ),
+            "sykmelder_hpr_kategori" to BqTypes.Enum(sykmelding.sykmelder.helsepersonellKategori),
+            // Behandler
             "behandler_hpr_nr" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HPR }?.id?.trim()),
             "behandler_her_id" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HER }?.id?.trim()),
             "behandler_ident_sha256" to BqTypes.String.Nullable(
                 sykmelding.behandler.ids.find { it.type == PersonIdType.FNR || it.type == PersonIdType.DNR }?.id?.let {
-                    hashService.hashIdent(it)
+                    hashService.hashIdent(it.trim())
                 }
-            ),
-            "behandler_hpr_kategori" to BqTypes.Enum(sykmelding.sykmelder.helsepersonellKategori),
+            )
         )
 
         return payload

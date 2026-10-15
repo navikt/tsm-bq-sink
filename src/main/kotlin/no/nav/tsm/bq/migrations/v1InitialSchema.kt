@@ -38,7 +38,9 @@ val baseSchema = listOf(
     nonNullableField("svangerskapsrelatert", StandardSQLTypeName.BOOL),
     nonNullableField("skjermet_for_pasient", StandardSQLTypeName.BOOL),
     nullableField("yrkesskadedato", StandardSQLTypeName.DATE),
-    nullableField("syketilfellet_start_dato", StandardSQLTypeName.STRING),
+    nullableField("syketilfelle_start_dato", StandardSQLTypeName.STRING),
+    nullableField("annen_fravers_arsak", StandardSQLTypeName.STRING),
+    nullableField("annen_fravers_arsak_beskrivelse", StandardSQLTypeName.STRING),
     // Aktivitet
     arrayRecord(
         "perioder",
@@ -58,16 +60,18 @@ val baseSchema = listOf(
 
 val nasjonalSykmeldingSchema = Schema.of(
     baseSchema + listOf(
-        // Medisinsk vurdering
-        nullableField("annen_fravers_arsak", StandardSQLTypeName.STRING),
         // Metadata
         nullableField("meta_regelsett_versjon", StandardSQLTypeName.STRING),
         nullableField("meta_orgnummer", StandardSQLTypeName.STRING),
+        // Sykmelder (signerende)
+        nonNullableField("sykmelder_hpr_nr", StandardSQLTypeName.STRING),
+        nullableField("sykmelder_her_id", StandardSQLTypeName.STRING),
+        nullableField("sykmelder_ident_sha256", StandardSQLTypeName.STRING),
+        nonNullableField("sykmelder_hpr_kategori", StandardSQLTypeName.STRING),
         // Behandler
         nullableField("behandler_hpr_nr", StandardSQLTypeName.STRING),
         nullableField("behandler_her_id", StandardSQLTypeName.STRING),
         nullableField("behandler_ident_sha256", StandardSQLTypeName.STRING),
-        nonNullableField("behandler_hpr_kategori", StandardSQLTypeName.STRING),
     )
 )
 

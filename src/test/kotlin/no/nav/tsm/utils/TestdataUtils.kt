@@ -37,7 +37,7 @@ fun digitalSykmelding(id: String): SykmeldingRecord = SykmeldingRecord.Digital(
             svangerskap = false,
             skjermetForPasient = false,
             yrkesskade = null,
-            annenFravarsgrunn = null,
+            annenFravarsgrunn = AnnenFravarArsakType.ARBEIDSRETTET_TILTAK,
         ),
         aktivitet = listOf(
             Aktivitet.IkkeMulig(
