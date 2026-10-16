@@ -3,6 +3,7 @@ package no.nav.tsm.kafka
 import com.google.cloud.bigquery.BigQuery
 import com.google.cloud.bigquery.QueryJobConfiguration
 import com.google.cloud.bigquery.QueryParameterValue
+import com.google.cloud.bigquery.storage.v1.Exceptions
 import com.google.cloud.bigquery.storage.v1.JsonStreamWriter
 import io.ktor.server.plugins.di.annotations.Named
 import io.opentelemetry.api.trace.Span
@@ -49,6 +50,12 @@ class SinkService(
                 span.setStatus(StatusCode.ERROR, "BigQuery rejected the record")
                 span.addEvent(response.error.toString())
             }
+        } catch (ex: Exceptions.AppendSerializationError) {
+            val details = ex.rowIndexToErrorMessage.toString()
+            span.setAttribute("bigquery.serialization_errors", details)
+            span.setStatus(StatusCode.ERROR, "BigQuery serialization failed")
+            span.recordException(ex)
+            throw BigQueryWriteException(ex)
         } catch (ex: InterruptedException) {
             span.setStatus(StatusCode.ERROR, "BigQuery rejected the record")
             span.recordException(ex)
