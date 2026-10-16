@@ -62,7 +62,20 @@ class SinkService(
             Thread.currentThread().interrupt()
             throw BigQueryWriteException(ex)
         } catch (ex: Exception) {
-            span.setStatus(StatusCode.ERROR, "BigQuery rejected the record")
+            val serializationError = generateSequence<Throwable>(ex) { it.cause }
+                .filterIsInstance<Exceptions.AppendSerializationError>()
+                .firstOrNull()
+
+            if (serializationError != null) {
+                span.setAttribute(
+                    "bigquery.serialization_errors",
+                    serializationError.rowIndexToErrorMessage.toString(),
+                )
+                span.setStatus(StatusCode.ERROR, "BigQuery serialization failed")
+            } else {
+                span.setStatus(StatusCode.ERROR, "BigQuery rejected the record")
+            }
+
             span.recordException(ex)
             throw BigQueryWriteException(ex)
         }
