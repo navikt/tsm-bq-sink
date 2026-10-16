@@ -28,6 +28,7 @@ fun applyMigrations(bigQuery: BigQuery) {
     logger.info("Current schema version: $currentSchemaVersion")
 
     if (currentSchemaVersion < 1) v1InitialSchema(bigQuery)
+    if (currentSchemaVersion < 2) v2ClusterNasjonal(bigQuery)
 
     // Any future migrations should be added here, e.g.:
     // if (currentSchemaVersion < 2) v2SomeNewSchema(bigQuery)
