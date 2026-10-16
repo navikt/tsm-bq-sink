@@ -1,13 +1,20 @@
 spec:
   replicas:
     min: 1
-    max: 1
+    max: 10
     cpuThresholdPercentage: 90
+    scalingStrategy:
+      kafka:
+        topic: tsm.sykmeldinger
+        consumerGroup: tsm-bq-sink
+        threshold: 10000
 
   resources:
     requests:
-      cpu: 200m
-      memory: 512Mi
+      cpu: 350m
+      memory: 690Mi
+    limits:
+      memory: 1Gi
 
   gcp:
     bigQueryDatasets:
