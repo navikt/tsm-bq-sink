@@ -3,6 +3,7 @@ kotlin = "2.4.20"
 logback = "1.6.5"
 logbackEncoder = "9.0"
 bigquery = "2.73.0"
+bigquerystorage = "3.35.0"
 
 # Testing
 mockk = "1.14.11"
@@ -11,6 +12,7 @@ testcontainers = "2.0.5"
 [libraries]
 # Database
 google-cloud-bigquery = { module = "com.google.cloud:google-cloud-bigquery", version.ref = "bigquery" }
+google-cloud-bigquerystorage = { module = "com.google.cloud:google-cloud-bigquerystorage", version.ref = "bigquerystorage" }
 
 # Monitoring and observability
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }

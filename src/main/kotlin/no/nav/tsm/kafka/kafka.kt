@@ -24,8 +24,8 @@ fun Application.configureKafka() {
             onRecord = { record, meta -> service.insertRecordIntoBigQuery(record, meta) },
             onTombstone = { service.deleteRecordFromBigQuery(it.key) },
             shouldSkip = { meta, ex ->
-                // Never skip BigQueryExceptions, this is something we have messed up, will be logged in lib
-                if (ex is BigQueryException) return@consume false
+                // Never skip failed BigQuery writes or deletes; they must be retried even in DEV.
+                if (ex is BigQueryException || ex is BigQueryWriteException) return@consume false
 
                 when (env.runtime.env) {
                     RuntimeCluster.DEV -> {
