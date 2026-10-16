@@ -217,7 +217,7 @@ private fun createSykmeldingerTable(bigQuery: BigQuery) {
         .setTableConstraints(tableConstraint)
         .build()
 
-    val regelutfallClustering = Clustering.newBuilder()
+    val clustering = Clustering.newBuilder()
         .setFields(listOf("regelutfall", "type", "meta_avsender_system"))
         .build()
 
@@ -225,7 +225,7 @@ private fun createSykmeldingerTable(bigQuery: BigQuery) {
         .setSchema(utenlandskSykmeldingSchema)
         .setTimePartitioning(timePartitioning)
         .setTableConstraints(tableConstraint)
-        .setClustering(regelutfallClustering)
+        .setClustering(clustering)
         .build()
 
     bigQuery.create(TableInfo.newBuilder(SYKMELDINGER_TABLE, nasjonalTableDefinition).build())

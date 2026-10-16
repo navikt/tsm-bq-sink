@@ -2,8 +2,8 @@ package no.nav.tsm.utils
 
 import com.google.cloud.NoCredentials
 import com.google.cloud.bigquery.*
-import no.nav.tsm.bq.migrations.applyMigrations
 import no.nav.tsm.bq.migrations.ensureMigrationsTable
+import no.nav.tsm.bq.migrations.v1InitialSchema
 import org.testcontainers.gcloud.BigQueryEmulatorContainer
 
 abstract class BigQueryTestContainer {
@@ -28,7 +28,7 @@ abstract class BigQueryTestContainer {
 
             // Run the migrations
             ensureMigrationsTable(bigQuery)
-            applyMigrations(bigQuery)
+            v1InitialSchema(bigQuery)
         }
     }
 
