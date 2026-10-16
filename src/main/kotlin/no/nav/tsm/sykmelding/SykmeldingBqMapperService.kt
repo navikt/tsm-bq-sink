@@ -139,7 +139,7 @@ class SykmeldingBqMappersService(
                     hashService.hashIdent(it.trim())
                 }
             ),
-            "sykmelder_hpr_kategori" to BqTypes.Enum(sykmelding.sykmelder.helsepersonellKategori),
+            "sykmelder_hpr_kategori" to BqTypes.Enum.Nullable(sykmelding.sykmelder.helsepersonellKategori),
             // Behandler
             "behandler_hpr_nr" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HPR }?.id?.trim()),
             "behandler_her_id" to BqTypes.String.Nullable(sykmelding.behandler.ids.find { it.type == PersonIdType.HER }?.id?.trim()),

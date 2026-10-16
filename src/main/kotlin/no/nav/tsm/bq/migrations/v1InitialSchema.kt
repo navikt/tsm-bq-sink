@@ -120,14 +120,14 @@ val nasjonalSykmeldingSchema = Schema.of(
         ),
         nullableField("meta_orgnummer", StandardSQLTypeName.STRING),
         // Sykmelder (signerende)
-        nonNullableField(
+        nullableField(
             "sykmelder_hpr_nr",
             StandardSQLTypeName.STRING,
             "'Signerende' sykmelder sitt HPR nummer, dette er helsepersonellet i HPR som blir regel-eksekvert."
         ),
         nullableField("sykmelder_her_id", StandardSQLTypeName.STRING),
         nullableField("sykmelder_ident_sha256", StandardSQLTypeName.STRING),
-        nonNullableField("sykmelder_hpr_kategori", StandardSQLTypeName.STRING),
+        nullableField("sykmelder_hpr_kategori", StandardSQLTypeName.STRING),
         // Behandler
         nullableField(
             "behandler_hpr_nr",
