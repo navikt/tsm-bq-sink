@@ -9,17 +9,25 @@ import no.nav.tsm.core.GcpConfig
 
 const val DATASET_ID = "tsm_kafka_sink"
 
-fun nonNullableField(name: String, type: StandardSQLTypeName): Field =
-    Field.newBuilder(name, type).setMode(Field.Mode.REQUIRED).build()
+fun nonNullableField(name: String, type: StandardSQLTypeName, description: String? = null): Field =
+    Field.newBuilder(name, type).setMode(Field.Mode.REQUIRED)
+        .setDescription(description)
+        .build()
 
-fun nullableField(name: String, type: StandardSQLTypeName): Field =
-    Field.newBuilder(name, type).setMode(Field.Mode.NULLABLE).build()
+fun nullableField(name: String, type: StandardSQLTypeName, description: String? = null): Field =
+    Field.newBuilder(name, type).setMode(Field.Mode.NULLABLE)
+        .setDescription(description)
+        .build()
 
-fun arrayRecord(name: String, vararg subfields: Field): Field =
-    Field.newBuilder(name, StandardSQLTypeName.STRUCT, *subfields).setMode(Field.Mode.REPEATED).build()
+fun arrayRecord(name: String, vararg subfields: Field, description: String? = null): Field =
+    Field.newBuilder(name, StandardSQLTypeName.STRUCT, *subfields).setMode(Field.Mode.REPEATED)
+        .setDescription(description)
+        .build()
 
-fun arrayOf(name: String, type: StandardSQLTypeName): Field =
-    Field.newBuilder(name, type).setMode(Field.Mode.REPEATED).build()
+fun arrayOf(name: String, type: StandardSQLTypeName, description: String? = null): Field =
+    Field.newBuilder(name, type).setMode(Field.Mode.REPEATED)
+        .setDescription(description)
+        .build()
 
 fun GcpConfig.initBigQuery() = BigQueryOptions.newBuilder()
     .setProjectId(projectId)
