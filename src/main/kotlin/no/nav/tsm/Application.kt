@@ -3,6 +3,7 @@ package no.nav.tsm
 import io.ktor.server.application.*
 import io.ktor.server.netty.*
 import no.nav.tsm.kafka.configureKafka
+import no.nav.tsm.plugins.configureBigQueryWriters
 import no.nav.tsm.plugins.configureDatabase
 import no.nav.tsm.plugins.configureDependencies
 import no.nav.tsm.plugins.configureMonitoring
@@ -16,5 +17,6 @@ fun Application.module() {
     configureMonitoring()
     configureDatabase()
 
+    configureBigQueryWriters()
     configureKafka()
 }

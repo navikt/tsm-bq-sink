@@ -26,6 +26,7 @@ dependencies {
 
     // Databases
     implementation(libs.google.cloud.bigquery)
+    implementation(libs.google.cloud.bigquerystorage)
 
     // Monitoring and logging
     implementation(libs.logback.classic)
