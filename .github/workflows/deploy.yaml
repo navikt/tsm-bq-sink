@@ -56,3 +56,19 @@ jobs:
             --environment dev-gcp \
             --set spec.image="${{ needs.build.outputs.image }}" \
             --wait
+
+  deploy-prod:
+    if: github.ref_name == 'main'
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: nais/setup@v1
+        with:
+          team: tsm
+      - name: deploy to prod-gcp
+        run: |
+          nais apply .nais/app.yaml \
+            --environment prod-gcp \
+            --set spec.image="${{ needs.build.outputs.image }}" \
+            --wait
