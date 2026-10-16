@@ -5,6 +5,9 @@ import com.google.cloud.bigquery.QueryJobConfiguration
 import com.google.cloud.bigquery.QueryParameterValue
 import com.google.cloud.bigquery.storage.v1.JsonStreamWriter
 import io.ktor.server.plugins.di.annotations.Named
+import io.opentelemetry.api.trace.Span
+import io.opentelemetry.api.trace.StatusCode
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.bq.*
 import no.nav.tsm.core.Environment
 import no.nav.tsm.ktor.kafka.consumer.RecordMeta
@@ -25,7 +28,12 @@ class SinkService(
 ) {
     private val bq: BigQuery = env.gcp.initBigQuery()
 
+    @WithSpan
     fun insertRecordIntoBigQuery(record: SykmeldingRecord, meta: RecordMeta) {
+        val span = Span.current()
+        span.setAttribute("sykmeldingId", record.sykmelding.id)
+        span.setAttribute("type", record.sykmelding.type.name)
+
         val (writer, payload) = if (record is SykmeldingRecord.Utenlandsk) {
             utenlandskWriter to sykmeldingBqMappersService.toUtenlandskBqPayload(record, meta)
         } else {
@@ -37,16 +45,27 @@ class SinkService(
             val response = writer.append(JSONArray().put(JSONObject(payload.toContent()))).get()
             check(!response.hasError()) {
                 "BigQuery rejected the record: ${response.error}"
+
+                span.setStatus(StatusCode.ERROR, "BigQuery rejected the record")
+                span.addEvent(response.error.toString())
             }
         } catch (ex: InterruptedException) {
+            span.setStatus(StatusCode.ERROR, "BigQuery rejected the record")
+            span.recordException(ex)
             Thread.currentThread().interrupt()
             throw BigQueryWriteException(ex)
         } catch (ex: Exception) {
+            span.setStatus(StatusCode.ERROR, "BigQuery rejected the record")
+            span.recordException(ex)
             throw BigQueryWriteException(ex)
         }
     }
 
+    @WithSpan
     fun deleteRecordFromBigQuery(key: String) {
+        val span = Span.current()
+        span.setAttribute("sykmeldingId", key)
+
         listOf(SYKMELDINGER_TABLE, SYKMELDINGER_UTENLANDSK_TABLE).forEach { table ->
             bq.query(
                 QueryJobConfiguration.newBuilder(
