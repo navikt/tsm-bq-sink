@@ -1,6 +1,7 @@
 package no.nav.tsm.sykmelding
 
 import com.google.cloud.bigquery.TableId
+import io.opentelemetry.instrumentation.annotations.WithSpan
 import no.nav.tsm.bq.BqPayload
 import no.nav.tsm.bq.BqTypes
 import no.nav.tsm.bq.DATASET_ID
@@ -113,6 +114,7 @@ class SykmeldingBqMappersService(
         return payload
     }
 
+    @WithSpan
     fun toUtenlandskBqPayload(record: SykmeldingRecord.Utenlandsk, meta: RecordMeta): BqPayload = record
         .toCommonBqPayload(meta)
         .add(
@@ -121,6 +123,7 @@ class SykmeldingBqMappersService(
             "meta_er_adresse_utland" to BqTypes.Boolean.Nullable(record.sykmelding.utenlandskInfo.erAdresseUtland)
         )
 
+    @WithSpan
     fun toNasjonalBqPayload(record: SykmeldingRecord, meta: RecordMeta): BqPayload {
         val sykmelding = record.sykmelding
         if (sykmelding !is Sykmelding.Nasjonal) {
