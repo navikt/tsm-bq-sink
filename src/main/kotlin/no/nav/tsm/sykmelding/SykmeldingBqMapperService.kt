@@ -80,7 +80,9 @@ class SykmeldingBqMappersService(
             )
 
             is MedisinskVurdering.Legacy -> payload.add(
-                "syketilfelle_start_dato" to BqTypes.Date.Nullable(mv.syketilfelletStartDato),
+                "syketilfelle_start_dato" to BqTypes.Date.Nullable(mv.syketilfelletStartDato?.let {
+                    if (it.year > 9999) null else it
+                }),
                 "annen_fravers_arsak" to BqTypes.Enum.Nullable(mv.annenFraversArsak?.arsak?.firstOrNull()),
                 "annen_fravers_arsak_beskrivelse" to BqTypes.String.Nullable(mv.annenFraversArsak?.beskrivelse),
             )
@@ -324,4 +326,3 @@ private fun periodeToBqPayload(aktivitet: Aktivitet): BqPayload {
 
     return payload
 }
-
