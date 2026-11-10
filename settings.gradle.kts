@@ -1,6 +1,6 @@
 rootProject.name = "tsm-bq-sink"
 
-val ktorVersion = "3.6.0"
+val ktorVersion = "3.6.1"
 val tsmKtorVersion = "1.3.8"
 
 dependencyResolutionManagement {
@@ -24,5 +24,5 @@ pluginManagement {
 }
 
 plugins {
-    id("io.github.ben-manes.versions.settings") version "0.65.0"
+    id("io.github.ben-manes.versions.settings") version "0.67.0"
 }
