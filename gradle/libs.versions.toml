@@ -1,12 +1,12 @@
 [versions]
-kotlin = "2.4.20"
-logback = "1.6.5"
+kotlin = "2.4.21"
+logback = "1.6.6"
 logbackEncoder = "9.0"
-bigquery = "2.73.0"
-bigquerystorage = "3.35.0"
+bigquery = "2.76.0"
+bigquerystorage = "3.38.0"
 
 # Testing
-mockk = "1.14.11"
+mockk = "1.14.12"
 testcontainers = "2.0.5"
 
 [libraries]
