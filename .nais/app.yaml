@@ -9,6 +9,9 @@ metadata:
 spec:
   port: 8080
   liveness:
+    initialDelay: 30
+    periodSeconds: 5
+    failureThreshold: 30
     path: /internal/health/alive
   readiness:
     path: /internal/health/ready
